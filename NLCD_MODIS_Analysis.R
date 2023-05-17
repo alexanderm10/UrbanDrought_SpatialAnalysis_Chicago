@@ -68,7 +68,7 @@ hurbndvi$year <- lubridate::year(as.Date(hurbndvi$time))
 hurbndvi$yday <- lubridate::yday(as.Date(hurbndvi$time))
 head(hurbndvi)
 
-ggplot(data=murbndvi, aes(x=yday, y=NDVI, group=year))+
+ggplot(data=hurbndvi, aes(x=yday, y=NDVI, group=year))+
   geom_line()+
   geom_line(data=hurbndvi[hurbndvi$year==2012, ], aes(color="2012"),size=2) +
   geom_line(data=hurbndvi[hurbndvi$year==2005, ], aes(color="2005"),size=2) +
@@ -94,6 +94,7 @@ ggplot(data=urb.all)+
   geom_line()+
   geom_line(data=urb.all[urb.all$year==2012, ], aes(color="2012"),size=1.5) +
   geom_line(data=urb.all[urb.all$year==2005, ], aes(color="2005"),size=1.5) +
-  scale_color_manual(values=c("2012"='goldenrod', '2005'="red3")) +
+  geom_line(data=urb.all[urb.all$year==2021, ], aes(color="2021"),size=1.5) +
+  scale_color_manual(values=c("2012"='goldenrod', '2005'="red3", '2021'="lightblue")) +
   labs(title="NLCD Urban Land Coverage NDVI", x="Day of Year") 
 #dev.off()
