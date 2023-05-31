@@ -1,9 +1,9 @@
 library(ggplot2)
 
-forest <- read.csv("~/Google Drive/My Drive/UrbanEcoDrought/Chi-NDVI-Forest.csv")
-urban <- read.csv("~/Google Drive/My Drive/UrbanEcoDrought/Chi-NDVI-Urban.csv")
-crop <- read.csv("~/Google Drive/My Drive/UrbanEcoDrought/Chi-NDVI-Crop.csv")
-sav <- read.csv("~/Google Drive/My Drive/UrbanEcoDrought/Chi-NDVI-Savanna.csv")
+forest <- read.csv("~/Google Drive/My Drive/UrbanEcoDrought/Chi-NDVI-Forest (1).csv")
+urban <- read.csv("~/Google Drive/My Drive/UrbanEcoDrought/Chi-NDVI-Urban (1).csv")
+crop <- read.csv("~/Google Drive/My Drive/UrbanEcoDrought/Chi-NDVI-Crop (1).csv")
+sav <- read.csv("~/Google Drive/My Drive/UrbanEcoDrought/Chi-NDVI-Savanna (1).csv")
 
 forest$type = "forest"
 urban$type = "urban"
@@ -27,7 +27,8 @@ ggplot(data=ndvi, aes(x=yday, y=NDVI)) +
   geom_line(data=ndvi[ndvi$year %in% c(2005),], aes(color="2005", group=year), size=1.25) +
   geom_line(data=ndvi[ndvi$year %in% c(2012),], aes(color="2012", group=year), size=1.25) +
   geom_line(data=ndvi[ndvi$year %in% c(2021),], aes(color="2021", group=year), size=1.25) +
-  scale_color_manual(values=c("2005"="red2", "2012"="darkorange", "2021"="goldenrod1"))+
+  geom_line(data=ndvi[ndvi$year %in% c(2023),], aes(color="2023", group=year), size=1.5) +
+  scale_color_manual(values=c("2005"="red2", "2012"="darkorange", "2021"="goldenrod1", "2023"="dodgerblue1"))+
   theme_bw() +
   theme(legend.position="top")
 dev.off()
