@@ -1,6 +1,6 @@
 library(ggplot2)
-path.google <- "~/Library/CloudStorage/GoogleDrive-breidy@mortonarb.org/My Drive/"
-sitendvi<- read.csv(file.path(path.google, "meanNDVISites.csv"))
+path.google <- "~/Library/CloudStorage/GoogleDrive-breidy@mortonarb.org/My Drive/eesundry/"
+lmmu<- read.csv(file.path(path.google, "NDVI_Lombard_Municipal.csv"))
 head(sitendvi)
 
 ggplot(data=sitendvi)+
