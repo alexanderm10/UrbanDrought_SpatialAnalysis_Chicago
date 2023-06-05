@@ -1,4 +1,5 @@
 library(ggplot2)
+library(tidyverse)
 ##setting up my path
 path.google <- "~/Library/CloudStorage/GoogleDrive-breidy@mortonarb.org/My Drive/eesundry"
 
@@ -97,3 +98,52 @@ ggplot(data = dat.all) +
   scale_color_manual(values = c("2012" = "goldenrod", "2005" = "red3", "2021" = "lightblue")) +
   labs(title = "Urban Ecological Drought Study Site NDVI", x = "Yday") +
   theme(strip.text = element_text(margin = margin(0, 0, 10, 0)))
+
+# ####Doing the same for landsat
+# ls<- read.csv(file.path(path.google, "Site_NDVI_landsat.csv"))
+# head(ls)
+# dat.ls <- ls[, c("Date","NDVI", "Name")]
+# head(dat.ls)
+# # Separate the Date column into separate columns for date and time
+# dat.ls <- dat.ls %>%
+#   separate(Date, into = c("Date", "Time"), sep = "T")
+# dat.ls <- dat.ls[, c("Date","NDVI", "Name")]
+# head(dat.ls)
+# 
+# dat.ls$year <- lubridate::year(as.Date(dat.ls$Date))
+# dat.ls$yday <- lubridate::yday(as.Date(dat.ls$Date))
+# head(dat.ls)
+# 
+# #plotting
+# ggplot(data=dat.ls)+
+#   facet_wrap(Name~.) +
+#   aes(x=yday, y=NDVI, group=year) +
+#   geom_line()+
+#   geom_line(data=dat.ls[dat.ls$year==2012, ], aes(color="2012"),size=1.0) +
+#   geom_line(data=dat.ls[dat.ls$year==2005, ], aes(color="2005"),size=1.0) +
+#   geom_line(data=dat.ls[dat.ls$year==2021, ], aes(color="2021"),size=1.0) +
+#   scale_color_manual(values=c("2012"='goldenrod', '2005'="red3", '2021'="lightblue")) +
+#   labs(title="Urban Ecological drought study site NDVI_landsat", x="Yday") 
+# #dev.off()
+# 
+# ##messing around with spacing the plot
+# ggplot(data = dat.ls) +
+#   facet_wrap(Name ~ ., ncol = 2, as.table = TRUE) +
+#   aes(x = yday, y = NDVI, group = year) +
+#   geom_line() +
+#   geom_line(data = dat.ls[dat.ls$year == 2012, ], aes(color = "2012"), size = 1.5) +
+#   geom_line(data = dat.ls[dat.ls$year == 2005, ], aes(color = "2005"), size = 1.5) +
+#   geom_line(data = dat.ls[dat.ls$year == 2021, ], aes(color = "2021"), size = 1.5) +
+#   scale_color_manual(values = c("2012" = "goldenrod", "2005" = "red3", "2021" = "lightblue")) +
+#   labs(title = "Urban Ecological Drought Study Site NDVI_Landsat", x = "Yday") +
+#   theme(strip.text = element_text(margin = margin(0, 0, 10, 0)))
+
+##Trying a different csv
+las<- read.csv(file.path(path.google, "site_mean_NDVI_2013_2023.csv"))
+head(las)
+dat.las <- las[, c("date","meanNDVI", "siteName")]
+head(dat.las)
+
+dat.las$year <- lubridate::year(as.Date(dat.las$Date))
+dat.las$yday <- lubridate::yday(as.Date(dat.las$Date))
+head(dat.las)
