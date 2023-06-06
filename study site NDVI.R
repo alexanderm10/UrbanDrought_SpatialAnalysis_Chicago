@@ -102,7 +102,10 @@ ggplot(data = dat.all) +
 # ####Doing the same for landsat
 # ls<- read.csv(file.path(path.google, "Site_NDVI_landsat.csv"))
 # head(ls)
-# dat.ls <- ls[, c("Date","NDVI", "Name")]
+# #dev.off()
+#dev.off()
+#dev.off()
+
 # head(dat.ls)
 # # Separate the Date column into separate columns for date and time
 # dat.ls <- dat.ls %>%
@@ -139,11 +142,37 @@ ggplot(data = dat.all) +
 #   theme(strip.text = element_text(margin = margin(0, 0, 10, 0)))
 
 ##Trying a different csv
-las<- read.csv(file.path(path.google, "site_mean_NDVI_2013_2023.csv"))
+las<- read.csv(file.path(path.google, "siteDVIlandsat.csv"))
 head(las)
 dat.las <- las[, c("date","meanNDVI", "siteName")]
 head(dat.las)
 
-dat.las$year <- lubridate::year(as.Date(dat.las$Date))
-dat.las$yday <- lubridate::yday(as.Date(dat.las$Date))
+colnames(dat.las)[colnames(dat.las) == "meanNDVI"] <- "NDVI"
+colnames(dat.las)[colnames(dat.las) == "siteName"] <- "name"
+dat.las$year <- lubridate::year(as.Date(dat.las$date))
+dat.las$yday <- lubridate::yday(as.Date(dat.las$date))
 head(dat.las)
+
+
+ #plotting
+ggplot(data=dat.las)+
+  facet_wrap(name~.) +
+  aes(x=yday, y=NDVI, group=year) +
+  geom_line()+
+  geom_line(data=dat.las[dat.las$year==2012, ], aes(color="2012"),size=1.0) +
+  geom_line(data=dat.las[dat.las$year==2005, ], aes(color="2005"),size=1.0) +
+  geom_line(data=dat.las[dat.las$year==2021, ], aes(color="2021"),size=1.0) +
+  scale_color_manual(values=c("2012"='goldenrod', '2005'="red3", '2021'="lightblue")) +
+  labs(title="Urban Ecological drought study site NDVI_landsat", x="Yday")
+#dev.off()
+
+##messing around with spacing the plot
+ggplot(data = dat.las) +
+  facet_wrap(name ~ ., ncol = 2, as.table = TRUE,scales = "free_y") +
+  aes(x = yday, y = NDVI, group = year) +
+  geom_line() +
+  geom_line(data = dat.las[dat.las$year == 2012, ], aes(color = "2012"), size = 1.5) +
+  geom_line(data = dat.las[dat.las$year == 2023, ], aes(color = "2023"), size = 1.5) +
+  scale_color_manual(values = c("2023" = "red", "2021" = "lightblue")) +
+  labs(title = "Urban Ecological Drought Study Site NDVI_Landsat", x = "Yday") +
+  theme(strip.text = element_text(margin = margin(0, 0, 10, 0)))
