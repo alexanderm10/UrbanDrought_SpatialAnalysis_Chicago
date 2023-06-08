@@ -99,80 +99,211 @@ ggplot(data = dat.all) +
   labs(title = "Urban Ecological Drought Study Site NDVI", x = "Yday") +
   theme(strip.text = element_text(margin = margin(0, 0, 10, 0)))
 
-# ####Doing the same for landsat
-# ls<- read.csv(file.path(path.google, "Site_NDVI_landsat.csv"))
-# head(ls)
-# #dev.off()
-#dev.off()
-#dev.off()
-
-# head(dat.ls)
-# # Separate the Date column into separate columns for date and time
-# dat.ls <- dat.ls %>%
-#   separate(Date, into = c("Date", "Time"), sep = "T")
-# dat.ls <- dat.ls[, c("Date","NDVI", "Name")]
-# head(dat.ls)
-# 
-# dat.ls$year <- lubridate::year(as.Date(dat.ls$Date))
-# dat.ls$yday <- lubridate::yday(as.Date(dat.ls$Date))
-# head(dat.ls)
-# 
-# #plotting
-# ggplot(data=dat.ls)+
-#   facet_wrap(Name~.) +
-#   aes(x=yday, y=NDVI, group=year) +
-#   geom_line()+
-#   geom_line(data=dat.ls[dat.ls$year==2012, ], aes(color="2012"),size=1.0) +
-#   geom_line(data=dat.ls[dat.ls$year==2005, ], aes(color="2005"),size=1.0) +
-#   geom_line(data=dat.ls[dat.ls$year==2021, ], aes(color="2021"),size=1.0) +
-#   scale_color_manual(values=c("2012"='goldenrod', '2005'="red3", '2021'="lightblue")) +
-#   labs(title="Urban Ecological drought study site NDVI_landsat", x="Yday") 
-# #dev.off()
-# 
-# ##messing around with spacing the plot
-# ggplot(data = dat.ls) +
-#   facet_wrap(Name ~ ., ncol = 2, as.table = TRUE) +
-#   aes(x = yday, y = NDVI, group = year) +
-#   geom_line() +
-#   geom_line(data = dat.ls[dat.ls$year == 2012, ], aes(color = "2012"), size = 1.5) +
-#   geom_line(data = dat.ls[dat.ls$year == 2005, ], aes(color = "2005"), size = 1.5) +
-#   geom_line(data = dat.ls[dat.ls$year == 2021, ], aes(color = "2021"), size = 1.5) +
-#   scale_color_manual(values = c("2012" = "goldenrod", "2005" = "red3", "2021" = "lightblue")) +
-#   labs(title = "Urban Ecological Drought Study Site NDVI_Landsat", x = "Yday") +
-#   theme(strip.text = element_text(margin = margin(0, 0, 10, 0)))
-
-##Trying a different csv
-las<- read.csv(file.path(path.google, "siteDVIlandsat.csv"))
-head(las)
-dat.las <- las[, c("date","meanNDVI", "siteName")]
-head(dat.las)
-
-colnames(dat.las)[colnames(dat.las) == "meanNDVI"] <- "NDVI"
-colnames(dat.las)[colnames(dat.las) == "siteName"] <- "name"
-dat.las$year <- lubridate::year(as.Date(dat.las$date))
-dat.las$yday <- lubridate::yday(as.Date(dat.las$date))
-head(dat.las)
+#####Doing the same for landsat
+##Loading them in removing weird brackets seperating columns and constraining valeues to numeric values
+#library lot
+l7<- read.csv(file.path(path.google, "Library_Parking_Lot_LS.csv"))
+l7$mean <- gsub("\\{|\\}", "", l7$mean)
+l7 <- l7 %>%
+ separate(mean, into = c("mean", "NDVI"), sep = "=", remove = FALSE)
+l7 <- subset(l7, NDVI != "null")
+l7$NDVI <- as.numeric(l7$NDVI)
+l7 <- l7[l7$NDVI >= -1.0 & l7$NDVI <= 1.0, ]
+head(l7)
 
 
- #plotting
-ggplot(data=dat.las)+
-  facet_wrap(name~.) +
+#Big Grass
+b7<- read.csv(file.path(path.google, "Big_grass_LS.csv"))
+b7$mean <- gsub("\\{|\\}", "", b7$mean)
+b7 <- b7 %>%
+  separate(mean, into = c("mean", "NDVI"), sep = "=", remove = FALSE)
+b7 <- subset(b7, NDVI != "null")
+b7$NDVI <- as.numeric(b7$NDVI)
+b7 <- b7[b7$NDVI >= -1.0 & b7$NDVI <= 1.0, ]
+head(b7)
+
+##UIC
+u7<- read.csv(file.path(path.google, "UIC_Lot_5_SES_lot_LS.csv"))
+u7$mean <- gsub("\\{|\\}", "", u7$mean)
+u7 <- u7 %>%
+  separate(mean, into = c("mean", "NDVI"), sep = "=", remove = FALSE)
+u7 <- subset(u7, NDVI != "null")
+u7$NDVI <- as.numeric(u7$NDVI)
+u7 <- u7[u7$NDVI >= -1.0 & u7$NDVI <= 1.0, ]
+head(u7)
+
+##Thornhill
+t7<- read.csv(file.path(path.google, "Thornhill_Parking_lot_LS.csv"))
+t7$mean <- gsub("\\{|\\}", "", t7$mean)
+t7 <- t7 %>%
+  separate(mean, into = c("mean", "NDVI"), sep = "=", remove = FALSE)
+t7 <- subset(t7, NDVI != "null")
+t7$NDVI <- as.numeric(t7$NDVI)
+t7 <- t7[t7$NDVI >= -1.0 & t7$NDVI <= 1.0, ]
+head(t7)
+
+##Research Lot
+r7<- read.csv(file.path(path.google, "Research_Parking_Lot_LS.csv"))
+r7$mean <- gsub("\\{|\\}", "", r7$mean)
+r7 <- r7 %>%
+  separate(mean, into = c("mean", "NDVI"), sep = "=", remove = FALSE)
+r7 <- subset(r7, NDVI != "null")
+r7$NDVI <- as.numeric(r7$NDVI)
+r7 <- r7[r7$NDVI >= -1.0 & r7$NDVI <= 1.0, ]
+head(r7)
+
+##Lombard Municipal
+m7<- read.csv(file.path(path.google, "Lombard_Municipal_Site_LS.csv"))
+m7$mean <- gsub("\\{|\\}", "", m7$mean)
+m7 <- m7 %>%
+  separate(mean, into = c("mean", "NDVI"), sep = "=", remove = FALSE)
+m7 <- subset(m7, NDVI != "null")
+m7$NDVI <- as.numeric(m7$NDVI)
+m7 <- m7[m7$NDVI >= -1.0 & m7$NDVI <= 1.0, ]
+head(m7)
+
+##Lombard Main Street
+s7<- read.csv(file.path(path.google, "Lombard_Main_Street_LS.csv"))
+s7$mean <- gsub("\\{|\\}", "", s7$mean)
+s7 <- s7 %>%
+  separate(mean, into = c("mean", "NDVI"), sep = "=", remove = FALSE)
+s7 <- subset(s7, NDVI != "null")
+s7$NDVI <- as.numeric(s7$NDVI)
+s7 <- s7[s7$NDVI >= -1.0 & s7$NDVI <= 1.0, ]
+head(s7)
+
+##one line to bind them
+dat.ls <- rbind(s7,m7,r7,l7,t7,u7,b7)
+
+dat.ls$year <- lubridate::year(as.Date(dat.ls$date))
+dat.ls$yday <- lubridate::yday(as.Date(dat.ls$date))
+dat.ls <- subset(dat.ls, yday >= 60 & yday <= 335)
+head(dat.ls)
+
+#plotting
+ggplot(data=dat.ls)+
+  facet_wrap(site~.) +
   aes(x=yday, y=NDVI, group=year) +
   geom_line()+
-  geom_line(data=dat.las[dat.las$year==2012, ], aes(color="2012"),size=1.0) +
-  geom_line(data=dat.las[dat.las$year==2005, ], aes(color="2005"),size=1.0) +
-  geom_line(data=dat.las[dat.las$year==2021, ], aes(color="2021"),size=1.0) +
+  geom_line(data=dat.ls[dat.ls$year==2012, ], aes(color="2012"),size=1.0) +
+  geom_line(data=dat.ls[dat.ls$year==2005, ], aes(color="2005"),size=1.0) +
+  geom_line(data=dat.ls[dat.ls$year==2021, ], aes(color="2021"),size=1.0) +
   scale_color_manual(values=c("2012"='goldenrod', '2005'="red3", '2021'="lightblue")) +
   labs(title="Urban Ecological drought study site NDVI_landsat", x="Yday")
 #dev.off()
 
 ##messing around with spacing the plot
-ggplot(data = dat.las) +
-  facet_wrap(name ~ ., ncol = 2, as.table = TRUE,scales = "free_y") +
+ggplot(data = dat.ls) +
+  facet_wrap(site ~ ., ncol = 2, as.table = TRUE,scales = "free_y") +
   aes(x = yday, y = NDVI, group = year) +
   geom_line() +
-  geom_line(data = dat.las[dat.las$year == 2012, ], aes(color = "2012"), size = 1.5) +
-  geom_line(data = dat.las[dat.las$year == 2023, ], aes(color = "2023"), size = 1.5) +
-  scale_color_manual(values = c("2023" = "red", "2021" = "lightblue")) +
+  geom_line(data = dat.ls[dat.ls$year == 2023, ], aes(color = "2023"), size = 1.0) +
+  geom_line(data = dat.ls[dat.ls$year == 2021, ], aes(color = "2021"), size = 1.0) +
+  scale_color_manual(values = c("2023" = "goldenrod", "2021" = "lightblue")) +
   labs(title = "Urban Ecological Drought Study Site NDVI_Landsat", x = "Yday") +
   theme(strip.text = element_text(margin = margin(0, 0, 10, 0)))
+
+
+# ####Doing the same for landsat with a slightly different mask 
+##Loading them in removing weird brackets seperating columns and constraining valeues to numeric values
+#library lot
+# lm<- read.csv(file.path(path.google, "Library_Parking_LotSM.csv"))
+# lm$mean <- gsub("\\{|\\}", "", lm$mean)
+# lm <- lm %>%
+#   separate(mean, into = c("mean", "NDVI"), sep = "=", remove = FALSE)
+# lm <- subset(lm, NDVI != "null")
+# lm$NDVI <- as.numeric(lm$NDVI)
+# lm <- lm[lm$NDVI >= -1.0 & lm$NDVI <= 1.0, ]
+# head(lm)
+# 
+# 
+# #Big Grass
+# bm<- read.csv(file.path(path.google, "Big_grassSM.csv"))
+# bm$mean <- gsub("\\{|\\}", "", bm$mean)
+# bm <- bm %>%
+#   separate(mean, into = c("mean", "NDVI"), sep = "=", remove = FALSE)
+# bm <- subset(bm, NDVI != "null")
+# bm$NDVI <- as.numeric(bm$NDVI)
+# bm <- bm[bm$NDVI >= -1.0 & bm$NDVI <= 1.0, ]
+# head(bm)
+# 
+# ##UIC
+# um<- read.csv(file.path(path.google, "UIC_Lot_5_SES_lotSM.csv"))
+# um$mean <- gsub("\\{|\\}", "", um$mean)
+# um <- um %>%
+#   separate(mean, into = c("mean", "NDVI"), sep = "=", remove = FALSE)
+# um <- subset(um, NDVI != "null")
+# um$NDVI <- as.numeric(um$NDVI)
+# um <- um[um$NDVI >= -1.0 & um$NDVI <= 1.0, ]
+# head(um)
+# 
+# ##Thornhill
+# tm<- read.csv(file.path(path.google, "Thornhill_Parking_lotSM.csv"))
+# tm$mean <- gsub("\\{|\\}", "", tm$mean)
+# tm <- tm %>%
+#   separate(mean, into = c("mean", "NDVI"), sep = "=", remove = FALSE)
+# tm <- subset(tm, NDVI != "null")
+# tm$NDVI <- as.numeric(tm$NDVI)
+# tm <- tm[tm$NDVI >= -1.0 & tm$NDVI <= 1.0, ]
+# head(tm)
+# 
+# ##Research Lot
+# rm<- read.csv(file.path(path.google, "Research_Parking_LotSM.csv"))
+# rm$mean <- gsub("\\{|\\}", "", rm$mean)
+# rm <- rm %>%
+#   separate(mean, into = c("mean", "NDVI"), sep = "=", remove = FALSE)
+# rm <- subset(rm, NDVI != "null")
+# rm$NDVI <- as.numeric(rm$NDVI)
+# rm <- rm[rm$NDVI >= -1.0 & rm$NDVI <= 1.0, ]
+# head(rm)
+# 
+# ##Lombard Municipal 
+# mm<- read.csv(file.path(path.google, "Lombard_Municipal_SiteSM.csv"))
+# mm$mean <- gsub("\\{|\\}", "", mm$mean)
+# mm <- mm %>%
+#   separate(mean, into = c("mean", "NDVI"), sep = "=", remove = FALSE)
+# mm <- subset(mm, NDVI != "null")
+# mm$NDVI <- as.numeric(mm$NDVI)
+# mm <- mm[mm$NDVI >= -1.0 & mm$NDVI <= 1.0, ]
+# head(mm)
+# 
+# ##Lombard Main Street
+# sm<- read.csv(file.path(path.google, "Lombard_Main_StreetSM.csv"))
+# sm$mean <- gsub("\\{|\\}", "", sm$mean)
+# sm <- sm %>%
+#   separate(mean, into = c("mean", "NDVI"), sep = "=", remove = FALSE)
+# sm <- subset(sm, NDVI != "null")
+# sm$NDVI <- as.numeric(sm$NDVI)
+# sm <- sm[sm$NDVI >= -1.0 & sm$NDVI <= 1.0, ]
+# head(sm)
+# 
+# ##one line to bind them
+# dat.lm <- rbind(sm,mm,rm,lm,tm,um,bm)
+# 
+# dat.lm$year <- lubridate::year(as.Date(dat.lm$date))
+# dat.lm$yday <- lubridate::yday(as.Date(dat.lm$date))
+# dat.lm <- subset(dat.lm, yday >= 60 & yday <= 335)
+# head(dat.lm)
+# 
+# #plotting
+# ggplot(data=dat.lm)+
+#   facet_wrap(site~.) +
+#   aes(x=yday, y=NDVI, group=year) +
+#   geom_line()+
+#   geom_line(data=dat.lm[dat.lm$year==2012, ], aes(color="2012"),size=1.0) +
+#   geom_line(data=dat.lm[dat.lm$year==2005, ], aes(color="2005"),size=1.0) +
+#   geom_line(data=dat.lm[dat.lm$year==2021, ], aes(color="2021"),size=1.0) +
+#   scale_color_manual(values=c("2012"='goldenrod', '2005'="red3", '2021'="lightblue")) +
+#   labs(title="Urban Ecological drought study site NDVI_landsat", x="Yday")
+# #dev.off()
+# 
+# ##messing around with spacing the plot
+# ggplot(data = dat.lm) +
+#   facet_wrap(site ~ ., ncol = 2, as.table = TRUE,scales = "free_y") +
+#   aes(x = yday, y = NDVI, group = year) +
+#   geom_line() +
+#   geom_line(data = dat.lm[dat.lm$year == 2023, ], aes(color = "2023"), size = 1.0) +
+#   geom_line(data = dat.lm[dat.lm$year == 2021, ], aes(color = "2021"), size = 1.0) +
+#   scale_color_manual(values = c("2023" = "goldenrod", "2021" = "lightblue")) +
+#   labs(title = "Urban Ecological Drought Study Site NDVI_Landsat", x = "Yday") +
+#   theme(strip.text = element_text(margin = margin(0, 0, 10, 0)))
