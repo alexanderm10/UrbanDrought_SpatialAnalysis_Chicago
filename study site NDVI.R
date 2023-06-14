@@ -412,6 +412,52 @@ ggplot(data = dat.l15) +
   labs(title = "Urban Ecological Drought Study Site NDVI_Landsat", x = "Yday") +
   theme(strip.text = element_text(margin = margin(0, 0, 10, 0)))
 
+
+
+
+##One more go at landsat with 7&8 Products
+
+lsu<- read.csv(file.path(path.google, "LCUIC.csv"))
+head(lsu)
+
+lsb<- read.csv(file.path(path.google, "LSBig_grass.csv"))
+head(lsb)
+
+lst<- read.csv(file.path(path.google, "LSThornhill.csv"))
+head(lst)
+
+lsl<- read.csv(file.path(path.google, "LSLibrary.csv"))
+head(lsl)
+
+lsm<- read.csv(file.path(path.google, "LSLombard_Municipal.csv"))
+head(lsm)
+
+lss<- read.csv(file.path(path.google, "LSLombard_Main_Street.csv"))
+head(lss)
+
+lsr<- read.csv(file.path(path.google, "LSResearch.csv"))
+head(lsr)
+
+dat.alls <- rbind(lsu, lsb, lst, lsl, lsm, lss, lsr)
+head(dat.alls)
+
+dat.alls <- na.omit(dat.alls)
+dat.alls$year <- lubridate::year(as.Date(dat.alls$date))
+dat.alls$yday <- lubridate::yday(as.Date(dat.alls$date))
+dat.alls <- dat.alls[dat.alls$NDVI >= -1.0 & dat.alls$NDVI <= 1.0, ]
+dat.alls <- subset(dat.alls, yday >= 60 & yday <= 335)
+head(dat.alls)
+
+
+ggplot(data = dat.alls) +
+  facet_wrap(Name ~ ., ncol = 2, as.table = TRUE,scales = "free_y") +
+  aes(x = yday, y = NDVI, ) +
+  geom_line() +
+  geom_line(data = dat.alls[dat.alls$year == 2023, ], aes(color = "2023"), size = 1.0) +
+  geom_line(data = dat.alls[dat.alls$year == 2021, ], aes(color = "2021"), size = 1.0) +
+  scale_color_manual(values = c("2023" = "goldenrod", "2021" = "lightblue")) +
+  labs(title = "Urban Ecological Drought Study Site NDVI_Landsat", x = "Yday") +
+  theme(strip.text = element_text(margin = margin(0, 0, 10, 0)))
 ### Loading in csv's of all of the morton arboretum and all of UIC in order to compare NDVI 
 # Via remote sensing products
 
@@ -438,7 +484,7 @@ dat.arb$year <- lubridate::year(as.Date(dat.arb$date))
 dat.arb$yday <- lubridate::yday(as.Date(dat.arb$date))
 
 ggplot(data=dat.arb)+
-  facet_grid(method~.) +
+  facet_grid(method~., as.table = TRUE,scales = "free_y") +
   aes(x=yday, y=NDVI, color=as.factor(year)) +
   geom_line()+
   labs(title="Arboretum NDVI by remote sensing product", x="Day of year")+
@@ -470,9 +516,12 @@ dat.uic$yday <- lubridate::yday(as.Date(dat.uic$date))
 head(dat.uic)
 
 ggplot(data=dat.uic)+
-  facet_grid(method~.) +
+  facet_grid(method~., as.table = TRUE,scales = "free_y") +
   aes(x=yday, y=NDVI, color=as.factor(year)) +
   geom_line()+
   labs(title="UIC NDVI by remote sensing product", x="Year")+
   scale_color_discrete(name = "Day of year ") 
 #dev.off()
+
+
+
