@@ -523,5 +523,28 @@ ggplot(data=dat.uic)+
   scale_color_discrete(name = "Day of year ") 
 #dev.off()
 
+## more trying stuff
+lst<- read.csv(file.path(path.google, "LSThornhill.csv"))
+lst$corrected <-"Not"
+head(lst)
+
+ths<- read.csv(file.path(path.google, "ThillSLCD.csv"))
+ths$corrected <-"Scan Line Corrected"
+head(ths)
+
+dat.libs <- rbind(lst, ths)
+dat.libs <- na.omit(dat.libs)
+dat.libs$NDVI <- as.numeric(dat.libs$NDVI)
+dat.libs$year <- lubridate::year(as.Date(dat.libs$date))
+dat.libs$yday <- lubridate::yday(as.Date(dat.libs$date))
+dat.libs<- dat.libs[dat.libs$NDVI >= -1.0 & dat.libs$NDVI <= 1.0, ]
+head(dat.libs)
 
 
+ggplot(data=dat.libs)+
+  facet_grid(corrected~., as.table = TRUE,scales = "free_y") +
+  aes(x=yday, y=NDVI, color=as.factor(year)) +
+  geom_line()+
+  labs(title="Arboretum Library, Landsat  NDVI by correction", x="Day of year")+
+  scale_color_discrete(name = "Year") 
+#dev.off()
