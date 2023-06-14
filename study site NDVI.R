@@ -411,3 +411,68 @@ ggplot(data = dat.l15) +
   scale_color_manual(values = c("2023" = "goldenrod", "2021" = "lightblue")) +
   labs(title = "Urban Ecological Drought Study Site NDVI_Landsat", x = "Yday") +
   theme(strip.text = element_text(margin = margin(0, 0, 10, 0)))
+
+### Loading in csv's of all of the morton arboretum and all of UIC in order to compare NDVI 
+# Via remote sensing products
+
+##Comparison of MODIS and Landsat at the Morton arb. 
+Amod<- read.csv(file.path(path.google, "Arb_NDVI_mod.csv"))
+head(Amod)
+dat.am <- Amod[, c("date", "mean_ndvi")]
+# adding a column for the method of data collection
+dat.am$method <-"Modis"
+# changing the NDVI column name to "NDVI" so columns and match and merge when data sets are bound
+colnames(dat.am)[colnames(dat.am) == "mean_ndvi"] <- "NDVI"
+head(dat.am)
+
+Als<- read.csv(file.path(path.google, "Arb_NDVI_L8.csv"))
+head(Als)
+dat.al <- Als[, c("date", "meanNDVI")]
+dat.al$method <-"Landsat"
+colnames(dat.al)[colnames(dat.al) == "meanNDVI"] <- "NDVI"
+head(dat.al)
+
+dat.arb <- rbind(dat.al, dat.am)
+dat.arb <- na.omit(dat.arb)
+dat.arb$year <- lubridate::year(as.Date(dat.arb$date))
+dat.arb$yday <- lubridate::yday(as.Date(dat.arb$date))
+
+ggplot(data=dat.arb)+
+  facet_grid(method~.) +
+  aes(x=yday, y=NDVI, color=as.factor(year)) +
+  geom_line()+
+  labs(title="Arboretum NDVI by remote sensing product", x="Day of year")+
+  scale_color_discrete(name = "Year") 
+#dev.off()
+
+
+##Comparison of MODIS and Landsat at UIC. 
+Umod<- read.csv(file.path(path.google, "Uic_NDVI_mod.csv"))
+head(Umod)
+dat.um <- Umod[, c("date", "mean_ndvi")]
+# adding a column for the method of data collection
+dat.um$method <-"Modis"
+# changing the NDVI column name to "NDVI" so columns and match and merge when data sets are bound
+colnames(dat.um)[colnames(dat.um) == "mean_ndvi"] <- "NDVI"
+head(dat.um)
+
+Uls<- read.csv(file.path(path.google, "UIC_NDVI_L8.csv"))
+head(Uls)
+dat.ul <- Uls[, c("date", "meanNDVI")]
+dat.ul$method <-"Landsat"
+colnames(dat.ul)[colnames(dat.ul) == "meanNDVI"] <- "NDVI"
+head(dat.ul)
+
+dat.uic <- rbind(dat.ul, dat.um)
+dat.uic <- na.omit(dat.uic)
+dat.uic$year <- lubridate::year(as.Date(dat.uic$date))
+dat.uic$yday <- lubridate::yday(as.Date(dat.uic$date))
+head(dat.uic)
+
+ggplot(data=dat.uic)+
+  facet_grid(method~.) +
+  aes(x=yday, y=NDVI, color=as.factor(year)) +
+  geom_line()+
+  labs(title="UIC NDVI by remote sensing product", x="Year")+
+  scale_color_discrete(name = "Day of year ") 
+#dev.off()
