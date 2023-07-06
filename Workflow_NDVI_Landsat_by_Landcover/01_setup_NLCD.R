@@ -16,21 +16,9 @@ assetHome <- ee_get_assethome()
 
 
 ##################### 
-# 0. Set up helper functions ----
+# 0. Read in helper functions ----
 ##################### 
-addTime <- function(image){
-  return(image$addBands(image$metadata('system:time_start')$divide(1000 * 60 * 60 * 24 * 365)))
-}
 
-setYear <- function(img){
-  return(img$set("year", img$date()$get("year")))
-}
-
-bitwiseExtract <- function(input, fromBit, toBit) {
-  maskSize <- ee$Number(1)$add(toBit)$subtract(fromBit)
-  mask <- ee$Number(1)$leftShift(maskSize)$subtract(1)
-  return(input$rightShift(fromBit)$bitwiseAnd(mask))
-}
 ##################### 
 
 
