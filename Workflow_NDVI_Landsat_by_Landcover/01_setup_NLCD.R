@@ -18,7 +18,7 @@ assetHome <- ee_get_assethome()
 ##################### 
 # 0. Read in helper functions ----
 ##################### 
-
+source("00_EarthEngine_HelperFunctions.R")
 ##################### 
 
 
