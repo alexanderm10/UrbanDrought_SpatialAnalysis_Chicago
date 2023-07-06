@@ -46,6 +46,8 @@ ndviVis = list(
 # Read in Landcover Masks ----
 ##################### 
 forMask <- ee$Image('users/crollinson/NLCD-Chicago_2000-2023_Forest')
+# ee_print(forMask)
+# Map$addLayer(forMask$select("YR2023"))
 
 grassMask <- ee$Image('users/crollinson/NLCD-Chicago_2000-2023_Grass')
 
@@ -58,6 +60,9 @@ urbLMask <- ee$Image('users/crollinson/NLCD-Chicago_2000-2023_Urban-Low')
 urbMMask <- ee$Image('users/crollinson/NLCD-Chicago_2000-2023_Urban-Medium')
 
 urbHMask <- ee$Image('users/crollinson/NLCD-Chicago_2000-2023_Urban-High')
+
+# Map$addLayer(urbLMask$select("YR2023"))
+# Map$addLayer(forMask$select("YR2023"))
 ##################### 
 
 ##################### 
@@ -89,7 +94,7 @@ landsat8 <- ee$ImageCollection("LANDSAT/LC08/C02/T1_L2")$filterBounds(Chicago)$m
 
 l8Mosaic = mosaicByDate(landsat8, 7)$select(c('blue_median', 'green_median', 'red_median', 'nir_median', 'swir1_median', 'swir2_median', 'LST_K_median', "NDVI_median"),c('blue', 'green', 'red', 'nir', 'swir1', 'swir2', 'LST_K', "NDVI"))$sort("date")
 # ee_print(l8Mosaic, "landsat8-Mosaic")
-Map$addLayer(l8Mosaic$first()$select('NDVI_median'), ndviVis, "NDVI - First")
+Map$addLayer(l8Mosaic$first()$select('NDVI'), ndviVis, "NDVI - First")
 ##################### 
 
 ##################### 
@@ -99,21 +104,23 @@ Map$addLayer(l8Mosaic$first()$select('NDVI_median'), ndviVis, "NDVI - First")
 # yrsLandsatNow <- ee$List(l8Mosaic$aggregate_array("year"))$distinct()
 # yrStrLC <- ee$List(paste0("YR", yrsLandsatNow$getInfo()))
 # bandYrs <- forMask$bandNames()$contains("2013")
+# Map$addLayer(l8Mosaic$select("NDVI")$first(), ndviVis, "Landsat8 Mosaic NDVI") # It worked!!
+# Map$addLayer(landsat8$select("NDVI")$first(), ndviVis, "Landsat8 Mosaic NDVI") # It worked!!
 
 
-# - Forest ----
+# - Low Urban ----
 # Extract NDVI
-ndviForYear = l8Mosaic$map(function(img){ 
+ndviUrbLYear = l8Mosaic$map(function(img){ 
   # Note: This is very slow, but I don't know how else to match the bands
   yrNow = ee$Number(img$get('year'))$format()$slice(0) # May be able to work around the slice, but I kept getting format issues
   yrStr = ee$String("YR")$cat(yrNow) # Need to figure out how to pull the right band
   
-  maskNow = forMask$select(yrStr); # Very clunky, but it works!
+  maskNow = urbLMask$select(yrStr); # Very clunky, but it works!
   
   return(img$updateMask(maskNow))
   })
-# ee_print(ndviForYear)
-# Map$addLayer(ndviForYear$select("NDVI")$first(), ndviVis, "Forest NDVI") # It worked!!
+# ee_print(ndviUrbLYear)
+# Map$addLayer(ndviUrbLYear$select("NDVI")$first(), ndviVis, "Forest NDVI") # It worked!!
 
 # # projLandcover = nlcdchi.first().projection()
 # # print(projLandcover)
@@ -122,23 +129,28 @@ ndviForYear = l8Mosaic$map(function(img){
 ######### Broken Code!!! ----
 ######### ************************** ######### 
 # reduce regions: THIS ISN"T WORKING YET!!!
-forMeans = ndviForYear$map(function(img){
-  ForMn = img$select("NDVI")$reduceRegion(reducer= ee$Reducer$mean(), geometry=Chicago$geometry(),
+UrbLMeans = ee$FeatureCollection(ndviUrbLYear$map(function(img){
+  RedMn = img$select("NDVI")$reduceRegion(reducer= ee$Reducer$mean(), geometry=Chicago$geometry(),
     scale=30, # hard-coded, but it's what has to happen to work
     maxPixels=1e13)
-  return(ee$Feature(NULL, ForMn))
-  # return(ee$Feature(NULL, ForMn)$set('system:time_start', img$get('system:time_start'))$set('time', ee$Date(img$get('system:time_start'))$format("YYYY-MM-dd")))
-})
-ee_print(forMeans, "For Means") # 
+  # test <- ee$Feature(NULL, ForMn)$set('system:time_start', img$get('system:time_start'))$set('date', ee$Date(img$get('system:time_start'))$format("YYYY-MM-dd"))
+  return(ee$Feature(NULL, RedMn)$set('system:time_start', img$get('system:time_start'))$set('date', ee$Date(img$get('system:time_start'))$format("YYYY-MM-dd")))
+}))
+ee_print(UrbLMeans, "For Means") # 
 
 # # # # Saving the outputs!
-forMeansList = ee.List(forMeans$distinct('Name')$aggregate_array('Name'))$cat(c('time', 'NDVI')) # LIST HERE THE PROPERTIES YOU WANT TO WRITE
-forMeansSave <- ee_table_to_drive(collection=forMeans, 
+UrbLMeansList = ee$List(UrbLMeans$distinct('Name')$aggregate_array('Name'))$cat(c('time', 'NDVI')) # LIST HERE THE PROPERTIES YOU WANT TO WRITE
+UrbLMeansList$getInfo()
+UrbLMeansSave <- ee_table_to_drive(collection=forMeans, 
                                   description="Save_ForestMeans_Landsat8",
-                                  folder="UrbanEcoDrought",
+                                  folder="UrbanEcoDrought_TEST",
+                                  fileNamePrefix="Landsat8_Urban-Low",
+                                  timePrefix=T,
                                   fileFormat="CSV",
-                                  selectors=c("time", "NDVI"), overwrite=T)
-forMeansSave$start()
+                                  selectors=c("time", "NDVI"))
+UrbLMeansSave$start()
+
+# test <- read.csv("~/Google Drive/My Drive/UrbanEcoDrought/Landsat8_Forest_2023_07_06_16_31_42.csv")
   # .evaluate(function (selectors) {
   #   # selectors must be a client-side object, so evaluate first.
   #   # If you know them up-front, just plug them in when exporting.
