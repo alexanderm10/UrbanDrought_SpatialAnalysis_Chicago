@@ -180,7 +180,7 @@ classGrass = collAnn$map(function(image) {
 
 grassMask <- ee$ImageCollection$toBands(classGrass)$rename(yrString)
 
-saveGrassMask <- ee_image_to_asset(grassMask, description="Save_lcMask-Grassland_2000-2023", assetId=file.path(assetHome, "NLCD-Chicago_2000-2023_Grassland"), maxPixels = 10e9, scale=30, region = chiBounds, crs=chiGeom$projection()$getInfo()$crs, crsTransform=chiGeom$projection()$getInfo()$transform, overwrite=T)
+saveGrassMask <- ee_image_to_asset(grassMask, description="Save_lcMask-Grass_2000-2023", assetId=file.path(assetHome, "NLCD-Chicago_2000-2023_Grass"), maxPixels = 10e9, scale=30, region = chiBounds, crs=chiGeom$projection()$getInfo()$crs, crsTransform=chiGeom$projection()$getInfo()$transform, overwrite=T)
 saveGrassMask$start()
 
 
