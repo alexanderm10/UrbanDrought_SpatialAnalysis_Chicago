@@ -153,3 +153,113 @@ saveLandCover <- ee_image_to_asset(lcChiAnn, description="Save_NLCD-Chicago_Annu
 saveLandCover$start()
 
 ##################### 
+
+##################### 
+# Set up masks for our key landcover classes here! ----
+# Note: This will use our Collection rather than the single image that has bands by years
+# # Forest: 41,42,43
+# # Shrub/Savanna/Grass: 51,52,53,71,72
+# # Crop = 81,82
+# # Open Urban: 21
+# # Low Intensity Urban: 22
+# # Medium Intensity Urban: 23
+# # High Intensity Urban: 24
+##################### 
+
+# # Define the land cover classes and their corresponding values
+
+# # Forest: 41,42,43 ----
+classFor = collAnn$map(function(image) {
+  d = ee$Date(ee$Number(image$get('system:time_start')))
+  lcMask = image$select('landcover')$eq(41)$Or(image$select('landcover')$eq(42))$Or(image$select('landcover')$eq(43));
+  return(image$updateMask(lcMask)$set('class', 'Forest')$set('year', d$get('year')));
+});
+
+forMask <- ee$ImageCollection$toBands(classFor)$rename(yrString)
+# ee_print(forMask)
+# Map$addLayer(forMask$select("YR2012"));
+
+saveForMask <- ee_image_to_asset(forMask, description="Save_lcMask-Forest_2000-2023", assetId=file.path(assetHome, "NLCD-Chicago_2000-2023_Forest"), maxPixels = 10e9, scale=30, region = chiBounds, crs=chiGeom$projection()$getInfo()$crs, crsTransform=chiGeom$projection()$getInfo()$transform, overwrite=T)
+saveForMask$start()
+
+
+# # Grassland/Savanna/Grass: 51,52,71,72 ----
+classGrass = collAnn$map(function(image) {
+  d = ee$Date(ee$Number(image$get('system:time_start')))
+  lcMask = image$select('landcover')$eq(51)$Or(image$select('landcover')$eq(52))$Or(image$select('landcover')$eq(71))$Or(image$select('landcover')$eq(72));
+  return(image$updateMask(lcMask)$set('class', 'Grassland')$set('year', d$get('year')));
+});
+
+grassMask <- ee$ImageCollection$toBands(classGrass)$rename(yrString)
+
+saveGrassMask <- ee_image_to_asset(grassMask, description="Save_lcMask-Grassland_2000-2023", assetId=file.path(assetHome, "NLCD-Chicago_2000-2023_Grassland"), maxPixels = 10e9, scale=30, region = chiBounds, crs=chiGeom$projection()$getInfo()$crs, crsTransform=chiGeom$projection()$getInfo()$transform, overwrite=T)
+saveGrassMask$start()
+
+
+
+# # Crop = 81,82 ----
+classCrop = collAnn$map(function(image) {
+  d = ee$Date(ee$Number(image$get('system:time_start')))
+  lcMask = image$select('landcover')$eq(81)$Or(image$select('landcover')$eq(82));
+  return(image$updateMask(lcMask)$set('class', 'Crop')$set('year', d$get('year')));
+});
+
+cropMask <- ee$ImageCollection$toBands(classCrop)$rename(yrString)
+
+saveCropMask <- ee_image_to_asset(cropMask, description="Save_lcMask-Crop_2000-2023", assetId=file.path(assetHome, "NLCD-Chicago_2000-2023_Crop"), maxPixels = 10e9, scale=30, region = chiBounds, crs=chiGeom$projection()$getInfo()$crs, crsTransform=chiGeom$projection()$getInfo()$transform, overwrite=T)
+saveCropMask$start()
+
+
+# # Open Urban: 21 ----
+classUrbO = collAnn$map(function(image) {
+  d = ee$Date(ee$Number(image$get('system:time_start')))
+  lcMask = image$select('landcover')$eq(21);
+  return(image$updateMask(lcMask)$set('class', 'Urban-Open')$set('year', d$get('year')));
+});
+
+urbOMask <- ee$ImageCollection$toBands(classUrbO)$rename(yrString)
+
+saveUrbOMask <- ee_image_to_asset(urbOMask, description="Save_lcMask-Urban-Open_2000-2023", assetId=file.path(assetHome, "NLCD-Chicago_2000-2023_Urban-Open"), maxPixels = 10e9, scale=30, region = chiBounds, crs=chiGeom$projection()$getInfo()$crs, crsTransform=chiGeom$projection()$getInfo()$transform, overwrite=T)
+saveUrbOMask$start()
+
+
+# # Low Intensity Urban: 22 ----
+classUrbL = collAnn$map(function(image) {
+  d = ee$Date(ee$Number(image$get('system:time_start')))
+  lcMask = image$select('landcover')$eq(22);
+  return(image$updateMask(lcMask)$set('class', 'Urban-Low')$set('year', d$get('year')));
+});
+
+urbLMask <- ee$ImageCollection$toBands(classUrbL)$rename(yrString)
+
+saveUrbLMask <- ee_image_to_asset(urbLMask, description="Save_lcMask-Urban-Low_2000-2023", assetId=file.path(assetHome, "NLCD-Chicago_2000-2023_Urban-Low"), maxPixels = 10e9, scale=30, region = chiBounds, crs=chiGeom$projection()$getInfo()$crs, crsTransform=chiGeom$projection()$getInfo()$transform, overwrite=T)
+saveUrbLMask$start()
+
+
+
+# # Medium Intensity Urban: 23 ----
+classUrbM = collAnn$map(function(image) {
+  d = ee$Date(ee$Number(image$get('system:time_start')))
+  lcMask = image$select('landcover')$eq(23);
+  return(image$updateMask(lcMask)$set('class', 'Urban-Medium')$set('year', d$get('year')));
+});
+
+urbMMask <- ee$ImageCollection$toBands(classUrbM)$rename(yrString)
+
+saveUrbMMask <- ee_image_to_asset(urbMMask, description="Save_lcMask-Urban-Medium_2000-2023", assetId=file.path(assetHome, "NLCD-Chicago_2000-2023_Urban-Medium"), maxPixels = 10e9, scale=30, region = chiBounds, crs=chiGeom$projection()$getInfo()$crs, crsTransform=chiGeom$projection()$getInfo()$transform, overwrite=T)
+saveUrbMMask$start()
+
+
+# # High Intenstity Urban: 24 ----
+classUrbH = collAnn$map(function(image) {
+  d = ee$Date(ee$Number(image$get('system:time_start')))
+  lcMask = image$select('landcover')$eq(24);
+  return(image$updateMask(lcMask)$set('class', 'Urban-Low')$set('year', d$get('year')));
+});
+
+urbHMask <- ee$ImageCollection$toBands(classUrbH)$rename(yrString)
+
+saveUrbHMask <- ee_image_to_asset(urbHMask, description="Save_lcMask-Urban-High_2000-2023", assetId=file.path(assetHome, "NLCD-Chicago_2000-2023_Urban-High"), maxPixels = 10e9, scale=30, region = chiBounds, crs=chiGeom$projection()$getInfo()$crs, crsTransform=chiGeom$projection()$getInfo()$transform, overwrite=T)
+saveUrbHMask$start()
+##################### 
+
