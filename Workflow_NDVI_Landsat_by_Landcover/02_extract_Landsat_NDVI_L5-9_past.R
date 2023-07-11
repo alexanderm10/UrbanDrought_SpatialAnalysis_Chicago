@@ -113,15 +113,16 @@ ee$Number(ee$String(bandYrs$get(0))$slice(2))$getInfo()
 # Map$addLayer(l8Mosaic$select("NDVI")$first(), ndviVis, "Landsat8 Mosaic NDVI") # It worked!!
 # Map$addLayer(landsat8$select("NDVI")$first(), ndviVis, "Landsat8 Mosaic NDVI") # It worked!!
 
-ndviFor = bandYrs$map(ee_utils_pyfunc(function(strYR){
-  YR <- ee$Number$parse(ee$String(strYR)$slice(2));
-  START <- ee$Date$fromYMD(YR,1,1);
-  END <- ee$Date$fromYMD(YR,12,31);
-  
-  forYR <- l8Mosaic$filter(START, END)
-  ee_print(forYR)
-  
-}))
+# I think this is going to be more efficient if I can figure out the proper date filtering
+# ndviFor = bandYrs$map(ee_utils_pyfunc(function(strYR){
+#   YR <- ee$Number$parse(ee$String(strYR)$slice(2));
+#   START <- ee$Date$fromYMD(YR,1,1);
+#   END <- ee$Date$fromYMD(YR,12,31);
+#   
+#   forYR <- l8Mosaic$filterDate(START, END)
+#   ee_print(forYR)
+#   
+# }))
 
 
 # - Low Urban ----
