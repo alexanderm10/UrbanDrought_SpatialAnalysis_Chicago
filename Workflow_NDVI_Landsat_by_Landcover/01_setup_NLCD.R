@@ -65,7 +65,6 @@ nlcdvis = list(
 Chicago = ee$FeatureCollection("projects/breidyee/assets/SevenCntyChiReg") 
 ee_print(Chicago)
 
-chiGeom <- Chicago$geometry()
 chiBounds <- Chicago$geometry()$bounds()
 chiBBox <- ee$Geometry$BBox(-88.70738, 41.20155, -87.52453, 42.49575)
 
@@ -76,12 +75,29 @@ nlcdChi <- ee$ImageCollection('USGS/NLCD_RELEASES/2019_REL/NLCD')$select('landco
 })
 
 lcVals = nlcdChi$first()$reduceRegion(ee$Reducer$frequencyHistogram(), Chicago, maxPixels=1e12)
-ee_print(lcVals)
+# ee_print(lcVals)
 lcVals$getInfo()
 
 # ee_print(nlcdChi) # Note: the nlcd is giving me a strsplit code error, but it does map!
 Map$addLayer(nlcdChi$first()$select('landcover'), nlcdvis, 'NLCD Land Cover',);
 
+
+projNLCD = nlcdChi$select("landcover")$first()$projection()
+projNLCD$getInfo() # Note that this is really messy
+# projCRS = projNLCD$crs()
+projCRS = "EPSG:4326" # This seems to be what works
+projTransform <- unlist(projNLCD$getInfo()$transform) # I saved this, but using it in the export causes really weird things
+
+# Chicago <- Chicago$map(function(FEAT){return(FEAT$reproject(projNLCD))})
+
+# chiGeom <- Chicago$geometry()
+# 
+# chiTransform = c(1,0,0,0,1,0)
+
+
+
+nlcdProj = "EPSG:4326"
+nlcdTransform = c(30, 0, -2493045, 0, -30, 3310005)
 ##################### 
 
 ##################### 
@@ -137,7 +153,7 @@ lcChiAnn <- ee$ImageCollection$toBands(collAnn)$rename(yrString)
 ee_print(lcChiAnn)
 Map$addLayer(lcChiAnn$select("YR2012"), nlcdvis, 'NLCD Land Cover');
 
-saveLandCover <- ee_image_to_asset(lcChiAnn, description="Save_NLCD-Chicago_AnnualDupe_2000-2023", assetId=file.path(assetHome, "NLCD-Chicago_AnnualDupe_2000-2023"), maxPixels = 10e9, scale=30, region = chiBounds, crs=chiGeom$projection()$getInfo()$crs, crsTransform=chiGeom$projection()$getInfo()$transform, overwrite=T)
+saveLandCover <- ee_image_to_asset(lcChiAnn, description="Save_NLCD-Chicago_AnnualDupe_2000-2023", assetId=file.path(assetHome, "NLCD-Chicago_AnnualDupe_2000-2023"), maxPixels = 10e9, scale=30, region = chiBounds, crs=chiProjCRS, overwrite=T)
 saveLandCover$start()
 
 ##################### 
@@ -167,8 +183,10 @@ forMask <- ee$ImageCollection$toBands(classFor)$rename(yrString)
 # ee_print(forMask)
 # Map$addLayer(forMask$select("YR2012"));
 
-saveForMask <- ee_image_to_asset(forMask, description="Save_lcMask-Forest_2000-2023", assetId=file.path(assetHome, "NLCD-Chicago_2000-2023_Forest"), maxPixels = 10e9, scale=30, region = chiBounds, crs=chiGeom$projection()$getInfo()$crs, crsTransform=chiGeom$projection()$getInfo()$transform, overwrite=T)
+saveForMask <- ee_image_to_asset(forMask, description="Save_lcMask-Forest_2000-2023", assetId=file.path(assetHome, "NLCD-Chicago_2000-2023_Forest"), maxPixels = 10e9, scale=30, region = chiBounds, crs="EPSG:4326", overwrite=T)
 saveForMask$start()
+# nlcdProj
+
 
 
 # # Grassland/Savanna/Grass: 51,52,71,72 ----
@@ -180,7 +198,7 @@ classGrass = collAnn$map(function(image) {
 
 grassMask <- ee$ImageCollection$toBands(classGrass)$rename(yrString)
 
-saveGrassMask <- ee_image_to_asset(grassMask, description="Save_lcMask-Grass_2000-2023", assetId=file.path(assetHome, "NLCD-Chicago_2000-2023_Grass"), maxPixels = 10e9, scale=30, region = chiBounds, crs=chiGeom$projection()$getInfo()$crs, crsTransform=chiGeom$projection()$getInfo()$transform, overwrite=T)
+saveGrassMask <- ee_image_to_asset(grassMask, description="Save_lcMask-Grass_2000-2023", assetId=file.path(assetHome, "NLCD-Chicago_2000-2023_Grass"), maxPixels = 10e9, scale=30, region = chiBounds, crs="EPSG:4326", overwrite=T)
 saveGrassMask$start()
 
 
@@ -194,7 +212,7 @@ classCrop = collAnn$map(function(image) {
 
 cropMask <- ee$ImageCollection$toBands(classCrop)$rename(yrString)
 
-saveCropMask <- ee_image_to_asset(cropMask, description="Save_lcMask-Crop_2000-2023", assetId=file.path(assetHome, "NLCD-Chicago_2000-2023_Crop"), maxPixels = 10e9, scale=30, region = chiBounds, crs=chiGeom$projection()$getInfo()$crs, crsTransform=chiGeom$projection()$getInfo()$transform, overwrite=T)
+saveCropMask <- ee_image_to_asset(cropMask, description="Save_lcMask-Crop_2000-2023", assetId=file.path(assetHome, "NLCD-Chicago_2000-2023_Crop"), maxPixels = 10e9, scale=30, region = chiBounds, crs="EPSG:4326", overwrite=T)
 saveCropMask$start()
 
 
@@ -207,7 +225,7 @@ classUrbO = collAnn$map(function(image) {
 
 urbOMask <- ee$ImageCollection$toBands(classUrbO)$rename(yrString)
 
-saveUrbOMask <- ee_image_to_asset(urbOMask, description="Save_lcMask-Urban-Open_2000-2023", assetId=file.path(assetHome, "NLCD-Chicago_2000-2023_Urban-Open"), maxPixels = 10e9, scale=30, region = chiBounds, crs=chiGeom$projection()$getInfo()$crs, crsTransform=chiGeom$projection()$getInfo()$transform, overwrite=T)
+saveUrbOMask <- ee_image_to_asset(urbOMask, description="Save_lcMask-Urban-Open_2000-2023", assetId=file.path(assetHome, "NLCD-Chicago_2000-2023_Urban-Open"), maxPixels = 10e9, scale=30, region = chiBounds, crs="EPSG:4326", overwrite=T)
 saveUrbOMask$start()
 
 
@@ -220,7 +238,7 @@ classUrbL = collAnn$map(function(image) {
 
 urbLMask <- ee$ImageCollection$toBands(classUrbL)$rename(yrString)
 
-saveUrbLMask <- ee_image_to_asset(urbLMask, description="Save_lcMask-Urban-Low_2000-2023", assetId=file.path(assetHome, "NLCD-Chicago_2000-2023_Urban-Low"), maxPixels = 10e9, scale=30, region = chiBounds, crs=chiGeom$projection()$getInfo()$crs, crsTransform=chiGeom$projection()$getInfo()$transform, overwrite=T)
+saveUrbLMask <- ee_image_to_asset(urbLMask, description="Save_lcMask-Urban-Low_2000-2023", assetId=file.path(assetHome, "NLCD-Chicago_2000-2023_Urban-Low"), maxPixels = 10e9, scale=30, region = chiBounds, crs="EPSG:4326", overwrite=T)
 saveUrbLMask$start()
 
 
@@ -234,7 +252,7 @@ classUrbM = collAnn$map(function(image) {
 
 urbMMask <- ee$ImageCollection$toBands(classUrbM)$rename(yrString)
 
-saveUrbMMask <- ee_image_to_asset(urbMMask, description="Save_lcMask-Urban-Medium_2000-2023", assetId=file.path(assetHome, "NLCD-Chicago_2000-2023_Urban-Medium"), maxPixels = 10e9, scale=30, region = chiBounds, crs=chiGeom$projection()$getInfo()$crs, crsTransform=chiGeom$projection()$getInfo()$transform, overwrite=T)
+saveUrbMMask <- ee_image_to_asset(urbMMask, description="Save_lcMask-Urban-Medium_2000-2023", assetId=file.path(assetHome, "NLCD-Chicago_2000-2023_Urban-Medium"), maxPixels = 10e9, scale=30, region = chiBounds, crs="EPSG:4326", overwrite=T)
 saveUrbMMask$start()
 
 
@@ -247,7 +265,7 @@ classUrbH = collAnn$map(function(image) {
 
 urbHMask <- ee$ImageCollection$toBands(classUrbH)$rename(yrString)
 
-saveUrbHMask <- ee_image_to_asset(urbHMask, description="Save_lcMask-Urban-High_2000-2023", assetId=file.path(assetHome, "NLCD-Chicago_2000-2023_Urban-High"), maxPixels = 10e9, scale=30, region = chiBounds, crs=chiGeom$projection()$getInfo()$crs, crsTransform=chiGeom$projection()$getInfo()$transform, overwrite=T)
+saveUrbHMask <- ee_image_to_asset(urbHMask, description="Save_lcMask-Urban-High_2000-2023", assetId=file.path(assetHome, "NLCD-Chicago_2000-2023_Urban-High"), maxPixels = 10e9, scale=30, region = chiBounds, crs="EPSG:4326", overwrite=T)
 saveUrbHMask$start()
 ##################### 
 
