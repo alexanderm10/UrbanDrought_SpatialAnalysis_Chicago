@@ -45,6 +45,13 @@ ndviVis = list(
 ##################### 
 # Read in Landcover Masks ----
 ##################### 
+Chicago = ee$FeatureCollection("projects/breidyee/assets/SevenCntyChiReg") 
+ee_print(Chicago)
+
+chiBounds <- Chicago$geometry()$bounds()
+chiBBox <- ee$Geometry$BBox(-88.70738, 41.20155, -87.52453, 42.49575)
+
+
 forMask <- ee$Image('users/crollinson/NLCD-Chicago_2000-2023_Forest')
 # ee_print(forMask)
 # Map$addLayer(forMask$select("YR2023"))
@@ -102,91 +109,104 @@ l8Mosaic = mosaicByDate(landsat8, 7)$select(c('blue_median', 'green_median', 're
 ##################### 
 # Mask NDVI by Landcover & condense to regional means ----
 ##################### 
+ndviForYear <- extractByLC(l8Mosaic, forMask)
+ndviGrassYear <- extractByLC(l8Mosaic, grassMask)
+ndviCropYear <- extractByLC(l8Mosaic, cropMask)
 
-# yrLC <- 
-# yrsLandsatNow <- ee$List(l8Mosaic$aggregate_array("year"))$distinct()
-# yrStrLC <- ee$List(paste0("YR", yrsLandsatNow$getInfo()))
-bandYrs <- forMask$bandNames()
-bandYrs$getInfo()
-ee$Number(ee$String(bandYrs$get(0))$slice(2))$getInfo()
-
-# Map$addLayer(l8Mosaic$select("NDVI")$first(), ndviVis, "Landsat8 Mosaic NDVI") # It worked!!
-# Map$addLayer(landsat8$select("NDVI")$first(), ndviVis, "Landsat8 Mosaic NDVI") # It worked!!
-
-# I think this is going to be more efficient if I can figure out the proper date filtering
-# ndviFor = bandYrs$map(ee_utils_pyfunc(function(strYR){
-#   YR <- ee$Number$parse(ee$String(strYR)$slice(2));
-#   START <- ee$Date$fromYMD(YR,1,1);
-#   END <- ee$Date$fromYMD(YR,12,31);
-#   
-#   forYR <- l8Mosaic$filterDate(START, END)
-#   ee_print(forYR)
-#   
-# }))
-
-
-# - Low Urban ----
-# Extract NDVI --> to redo and loop through the years, you can use the yrLstString to do the mapping and that should work better; look at code from UHI workflow
-# ndviUrbLYearList = 
-
-ndviUrbLYear = l8Mosaic$map(function(img){ 
-  # Note: This is very slow, but I don't know how else to match the bands
-  yrNow = ee$Number(img$get('year'))$format()$slice(0) # May be able to work around the slice, but I kept getting format issues
-  yrStr = ee$String("YR")$cat(yrNow) # Need to figure out how to pull the right band
-  
-  maskNow = urbLMask$select(yrStr); # Very clunky, but it works!
-  
-  return(img$updateMask(maskNow))
-  })
-# ee_print(ndviUrbLYear)
+ndviUrbOYear <- extractByLC(l8Mosaic, urbOMask)
+ndviUrbLYear <- extractByLC(l8Mosaic, urbLMask)
+ndviUrbMYear <- extractByLC(l8Mosaic, urbMMask)
+ndviUrbHYear <- extractByLC(l8Mosaic, urbHMask)
 # Map$addLayer(ndviUrbLYear$select("NDVI")$first(), ndviVis, "Forest NDVI") # It worked!!
 
-# # projLandcover = nlcdchi.first().projection()
-# # print(projLandcover)
 
 ######### ************************** ######### 
-######### Broken Code!!! ----
-######### ************************** ######### 
-# reduce regions: THIS ISN"T WORKING YET!!!
-UrbLMeans = ee$FeatureCollection(ndviUrbLYear$map(function(img){
-  RedMn = img$select("NDVI")$reduceRegion(reducer= ee$Reducer$mean(), geometry=Chicago$geometry(),
-    scale=30, # hard-coded, but it's what has to happen to work
-    maxPixels=1e13)
-  # test <- ee$Feature(NULL, ForMn)$set('system:time_start', img$get('system:time_start'))$set('date', ee$Date(img$get('system:time_start'))$format("YYYY-MM-dd"))
-  return(ee$Feature(NULL, RedMn)$set('system:time_start', img$get('system:time_start'))$set('date', ee$Date(img$get('system:time_start'))$format("YYYY-MM-dd")))
-}))
-ee_print(UrbLMeans, "UrbL Means") # 
+# reduce regions: ----
+ForMeans = ee$FeatureCollection(ndviForYear$map(regionNDVIMean))
+GrassMeans = ee$FeatureCollection(ndviGrassYear$map(regionNDVIMean))
+CropMeans = ee$FeatureCollection(ndviCropYear$map(regionNDVIMean))
+
+UrbOMeans = ee$FeatureCollection(ndviUrbOYear$map(regionNDVIMean))
+UrbLMeans = ee$FeatureCollection(ndviUrbLYear$map(regionNDVIMean))
+UrbMMeans = ee$FeatureCollection(ndviUrbMYear$map(regionNDVIMean))
+UrbHMeans = ee$FeatureCollection(ndviUrbHYear$map(regionNDVIMean))
+# ee_print(UrbLMeans, "UrbL Means") # 
 
 # # # # Saving the outputs!
-UrbLMeansList = ee$List(UrbLMeans$distinct('Name')$aggregate_array('Name'))$cat(c('time', 'NDVI')) # LIST HERE THE PROPERTIES YOU WANT TO WRITE
-# UrbLMeansList$getInfo()
-UrbLMeansSave <- ee_table_to_drive(collection=UrbLMeans, 
-                                  description="Save_Urb-L-Means_Landsat8",
+ForMeansSave <- ee_table_to_drive(collection=ForMeans, 
+                                   description="Save_Forest-Means_Landsat8",
+                                   folder="UrbanEcoDrought_TEST",
+                                   fileNamePrefix="Landsat8_Forest",
+                                   timePrefix=T,
+                                   fileFormat="CSV",
+                                   selectors=c("date", "NDVI"))
+ForMeansSave$start()
+
+GrassMeansSave <- ee_table_to_drive(collection=GrassMeans, 
+                                  description="Save_Grassland-Means_Landsat8",
                                   folder="UrbanEcoDrought_TEST",
-                                  fileNamePrefix="Landsat8_Urban-Low",
+                                  fileNamePrefix="Landsat8_Grassland",
                                   timePrefix=T,
                                   fileFormat="CSV",
-                                  selectors=c("time", "NDVI"))
+                                  selectors=c("date", "NDVI"))
+GrassMeansSave$start()
+
+CropMeansSave <- ee_table_to_drive(collection=CropMeans, 
+                                    description="Save_Crop-Means_Landsat8",
+                                    folder="UrbanEcoDrought_TEST",
+                                    fileNamePrefix="Landsat8_Crop",
+                                    timePrefix=T,
+                                    fileFormat="CSV",
+                                    selectors=c("date", "NDVI"))
+CropMeansSave$start()
+
+
+UrbOMeansSave <- ee_table_to_drive(collection=UrbOMeans, 
+                                  description="Save_Urb-O-Means_Landsat8",
+                                  folder="UrbanEcoDrought_TEST",
+                                  fileNamePrefix="Landsat8_Urban-Open",
+                                  timePrefix=T,
+                                  fileFormat="CSV",
+                                  selectors=c("date", "NDVI"))
+UrbOMeansSave$start()
+
+
+UrbLMeansSave <- ee_table_to_drive(collection=UrbLMeans, 
+                                   description="Save_Urb-L-Means_Landsat8",
+                                   folder="UrbanEcoDrought_TEST",
+                                   fileNamePrefix="Landsat8_Urban-Low",
+                                   timePrefix=T,
+                                   fileFormat="CSV",
+                                   selectors=c("date", "NDVI"))
 UrbLMeansSave$start()
 
-test <- read.csv("~/Google Drive/My Drive/UrbanEcoDrought_TEST/Landsat8_Urban-Low_2023_07_11_12_06_34.csv")
-head(test)
-  # .evaluate(function (selectors) {
-  #   # selectors must be a client-side object, so evaluate first.
-  #   # If you know them up-front, just plug them in when exporting.
-  #   desc1 = 'table_demo_'
-  #   Export.table.toDrive({
-  #     collection: forMeans,
-  #     description: 'Chi-NDVI-Forest-Landsat_8-9_mosaic',
-  #     folder: 'UrbanEcoDrought',
-  #     fileFormat: 'CSV',
-  #     selectors: selectors
-  #   })
-  # });
-######### ************************** ######### 
+UrbMMeansSave <- ee_table_to_drive(collection=UrbMMeans, 
+                                   description="Save_Urb-M-Means_Landsat8",
+                                   folder="UrbanEcoDrought_TEST",
+                                   fileNamePrefix="Landsat8_Urban-Medium",
+                                   timePrefix=T,
+                                   fileFormat="CSV",
+                                   selectors=c("date", "NDVI"))
+UrbMMeansSave$start()
 
-  
+UrbHMeansSave <- ee_table_to_drive(collection=UrbHMeans, 
+                                   description="Save_Urb-H-Means_Landsat8",
+                                   folder="UrbanEcoDrought_TEST",
+                                   fileNamePrefix="Landsat8_Urban-High",
+                                   timePrefix=T,
+                                   fileFormat="CSV",
+                                   selectors=c("date", "NDVI"))
+UrbHMeansSave$start()
 
 
-##################### 
+
+# test <- read.csv("~/Google Drive/My Drive/UrbanEcoDrought_TEST/Landsat8_Urban-High_2023_07_11_16_31_03.csv")
+# test$date <- as.Date(test$date)
+# test$year <- lubridate::year(test$date)
+# test$yday <- lubridate::yday(test$date)
+# summary(test)
+# # 
+# library(ggplot2)
+# ggplot(data=test) +
+#   geom_line(aes(x=yday, y=NDVI, group=year))
 

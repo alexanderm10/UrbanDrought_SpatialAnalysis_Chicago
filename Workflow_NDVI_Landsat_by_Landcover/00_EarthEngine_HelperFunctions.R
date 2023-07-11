@@ -1,6 +1,6 @@
 # Script with a bunch of commonly used helper functions to streamline code
 
-addTime <- function(image){
+addTime <- function(image){ 
   return(image$addBands(image$metadata('system:time_start')$divide(1000 * 60 * 60 * 24 * 365)))
 }
 
@@ -32,13 +32,14 @@ applyLandsatBitMask = function(img){
   # satMask <- qaRad$bitwiseAnd(3 << 4)$eq(0); ## get rid of any saturated bands we use to calculate NDVI
   satMask <- bitwiseExtract(qaRad, 3, 4)$eq(0) ## get rid of any saturated bands we use to calculate NDVI 
   # clearMask <- qaPix$bitwiseAnd(1<<7)$eq(0)
-  clearMask <- bitwiseExtract(qaPix, 1, 7)$eq(0) 
+  clearMask <- bitwiseExtract(qaPix, 1, 5)$eq(0)
+  waterMask <- bitwiseExtract(qaPix, 7, 7)$eq(0)
   cloudConf = bitwiseExtract(qaPix, 8, 9)$lte(1) ## we can only go with low confidence; doing finer leads to NOTHING making the cut
   shadowConf <- bitwiseExtract(qaPix, 10, 11)$lte(1) ## we can only go with low confidence; doing finer leads to NOTHING making the cut
   snowConf <- bitwiseExtract(qaPix, 12, 13)$lte(1) ## we can only go with low confidence; doing finer leads to NOTHING making the cut
   
   
-  img <- img$updateMask(clearMask$And(cloudConf)$And(shadowConf)$And(snowConf)$And(terrMask)$And(satMask));
+  img <- img$updateMask(clearMask$And(waterMask)$And(cloudConf)$And(shadowConf)$And(snowConf)$And(terrMask)$And(satMask));
   
   return(img)
   
@@ -73,4 +74,25 @@ mosaicByDate <- function(imcol, dayWindow){
   # testOUT <- ee$ImageCollection(mosaic_imlist)
   # ee_print(testOUT)
   return (ee$ImageCollection(mosaic_imlist))
+}
+
+extractByLC <- function(imcol, MASK){
+  imcol <- imcol$map(function(img){
+    # Note: This is very slow, but I don't know how else to match the bands
+    yrNow = ee$Number(img$get('year'))$format()$slice(0) # May be able to work around the slice, but I kept getting format issues
+    yrStr = ee$String("YR")$cat(yrNow) # Need to figure out how to pull the right band
+    
+    maskNow = MASK$select(yrStr); # Very clunky, but it works!
+    
+    return(img$updateMask(maskNow))
+    
+  })
+  return(imcol)
+}
+
+regionNDVIMean <- function(img){
+  RedMn = img$select("NDVI")$reduceRegion(reducer= ee$Reducer$mean(), geometry=Chicago$geometry(),
+                                          scale=30, # hard-coded, but it's what has to happen to work
+                                          maxPixels=1e13)
+  return(ee$Feature(NULL, RedMn)$set('system:time_start', img$get('system:time_start'))$set('date', ee$Date(img$get('system:time_start'))$format("YYYY-MM-dd")))
 }
