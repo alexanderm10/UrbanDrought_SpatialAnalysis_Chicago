@@ -76,7 +76,7 @@ mosaicByDate <- function(imcol, dayWindow){
   return (ee$ImageCollection(mosaic_imlist))
 }
 
-extractByLC <- function(imcol, MASK){
+maskByLC <- function(imcol, MASK){
   imcol <- imcol$map(function(img){
     # Note: This is very slow, but I don't know how else to match the bands
     yrNow = ee$Number(img$get('year'))$format()$slice(0) # May be able to work around the slice, but I kept getting format issues
@@ -95,4 +95,36 @@ regionNDVIMean <- function(img){
                                           scale=30, # hard-coded, but it's what has to happen to work
                                           maxPixels=1e13)
   return(ee$Feature(NULL, RedMn)$set('system:time_start', img$get('system:time_start'))$set('date', ee$Date(img$get('system:time_start'))$format("YYYY-MM-dd")))
+}
+
+# Function to extract things by landcover type; note: there are some not soft-coded options here, 
+#   so you'll need to make sure that landcover and mask names match what Christy is using in this repo
+extractByLC <- function(imcol, landcover, outfolder, fileNamePrefix, ...){
+  lcnames <- c("forest", "crop", "grassland", "urban-high", "urban-medium", "urban-low", "urban-open")
+  if(!landcover %in% lcnames){
+    stop(paste("Invalid landcover type.  Must match one of the following:", paste(lcnames, collapse = ", ")))
+  }
+  if(landcover=="forest") lcMask = forMask
+  if(landcover=="crop") lcMask = cropMask
+  if(landcover=="grassland") lcMask = grassMask
+  if(landcover=="urban-high") lcMask = urbHMask
+  if(landcover=="urban-medium") lcMask = urbMMask
+  if(landcover=="urban-low") lcMask = urbLMask
+  if(landcover=="urban-open") lcMask = urbOMask
+
+  ndviLCYear <- maskByLC(imcol, lcMask)
+
+  # regionNDVIMean is a function defied above
+  LCMeans = ee$FeatureCollection(ndviLCYear$map(regionNDVIMean))
+
+  LCMeansSave <- ee_table_to_drive(collection=LCMeans,
+                                    description=paste0("Save_", fileNamePrefix),
+                                    folder=outfolder,
+                                    fileNamePrefix=fileNamePrefix,
+                                    timePrefix=T,
+                                    fileFormat="CSV",
+                                    selectors=c("date", "NDVI"))
+  LCMeansSave$start()
+
+  return(print(paste0(fileNamePrefix, " processed! Check Earth Engine queue for status")))
 }

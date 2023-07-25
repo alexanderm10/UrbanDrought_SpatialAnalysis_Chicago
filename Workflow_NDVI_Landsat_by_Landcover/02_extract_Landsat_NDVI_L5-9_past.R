@@ -109,14 +109,29 @@ l8Mosaic = mosaicByDate(landsat8, 7)$select(c('blue_median', 'green_median', 're
 ##################### 
 # Mask NDVI by Landcover & condense to regional means ----
 ##################### 
-ndviForYear <- extractByLC(l8Mosaic, forMask)
-ndviGrassYear <- extractByLC(l8Mosaic, grassMask)
-ndviCropYear <- extractByLC(l8Mosaic, cropMask)
+lcnames <- c("forest", "crop", "grassland", "urban-high", "urban-medium", "urban-low", "urban-open")
+for(LCTYPE in lcnames){
+  # print(LCTYPE)
+  extractByLC(imcol=l8Mosaic, landcover=LCTYPE, outfolder="UrbanEcoDrought_TEST", fileNamePrefix=paste0("Landsat8_", LCTYPE))
+}
 
-ndviUrbOYear <- extractByLC(l8Mosaic, urbOMask)
-ndviUrbLYear <- extractByLC(l8Mosaic, urbLMask)
-ndviUrbMYear <- extractByLC(l8Mosaic, urbMMask)
-ndviUrbHYear <- extractByLC(l8Mosaic, urbHMask)
+extractByLC(imcol=l8Mosaic, landcover="forest", outfolder="UrbanEcoDrought_TEST", fileNamePrefix="Landsat8_Forest")
+extractByLC(imcol=l8Mosaic, landcover="grassland", outfolder="UrbanEcoDrought_TEST", fileNamePrefix="Landsat8_Grassland")
+extractByLC(imcol=l8Mosaic, landcover="crop", outfolder="UrbanEcoDrought_TEST", fileNamePrefix="Landsat8_Crop")
+extractByLC(imcol=l8Mosaic, landcover="urban-open", outfolder="UrbanEcoDrought_TEST", fileNamePrefix="Landsat8_Urban-Open")
+extractByLC(imcol=l8Mosaic, landcover="urban-low", outfolder="UrbanEcoDrought_TEST", fileNamePrefix="Landsat8_Urban-Open")
+extractByLC(imcol=l8Mosaic, landcover="urban-medium", outfolder="UrbanEcoDrought_TEST", fileNamePrefix="Landsat8_Urban-Open")
+extractByLC(imcol=l8Mosaic, landcover="urban-high", outfolder="UrbanEcoDrought_TEST", fileNamePrefix="Landsat8_Urban-Open")
+
+
+ndviForYear <- maskByLC(l8Mosaic, forMask)
+ndviGrassYear <- maskByLC(l8Mosaic, grassMask)
+ndviCropYear <- maskByLC(l8Mosaic, cropMask)
+
+ndviUrbOYear <- maskByLC(l8Mosaic, urbOMask)
+ndviUrbLYear <- maskByLC(l8Mosaic, urbLMask)
+ndviUrbMYear <- maskByLC(l8Mosaic, urbMMask)
+ndviUrbHYear <- maskByLC(l8Mosaic, urbHMask)
 # Map$addLayer(ndviUrbLYear$select("NDVI")$first(), ndviVis, "Forest NDVI") # It worked!!
 
 
