@@ -8,24 +8,26 @@
 # 2. Make and graphs 
 
 library(ggplot2)
-path.google <- ("~/Google Drive/Shared drives/Urban Ecological Drought/data/landsat_NDVI")
+# path.google <- ("~/Google Drive/Shared drives/Urban Ecological Drought/data/landsat_NDVI")
+path.google <- ("~/Google Drive/My Drive/UrbanEcoDrought_TEST")
+
 # Clunky code, but should pull the latest file
-forest <- read.csv(file.path(path.google, dir(path.google, "Landsat8_forest")[length(dir(path.google, "Landsat8_forest"))]))
-grass <- read.csv(file.path(path.google, dir(path.google, "Landsat8_grassland")[length(dir(path.google, "Landsat8_grassland"))]))
-crop <- read.csv(file.path(path.google, dir(path.google, "Landsat8_crop")[length(dir(path.google, "Landsat8_crop"))]))
-urbO <- read.csv(file.path(path.google, dir(path.google, "Landsat8_urban-open")[length(dir(path.google, "Landsat8_urban-open"))]))
-urbL <- read.csv(file.path(path.google, dir(path.google, "Landsat8_urban-low")[length(dir(path.google, "Landsat8_urban-low"))]))
-urbM <- read.csv(file.path(path.google, dir(path.google, "Landsat8_urban-med")[length(dir(path.google, "Landsat8_urban-med"))]))
-urbH <- read.csv(file.path(path.google, dir(path.google, "Landsat8_urban-high")[length(dir(path.google, "Landsat8_urban-high"))]))
+LCforest <- read.csv(file.path(path.google, dir(path.google, "Landsat8_forest")[length(dir(path.google, "Landsat8_forest"))]))
+LCgrass <- read.csv(file.path(path.google, dir(path.google, "Landsat8_grassland")[length(dir(path.google, "Landsat8_grassland"))]))
+LCcrop <- read.csv(file.path(path.google, dir(path.google, "Landsat8_crop")[length(dir(path.google, "Landsat8_crop"))]))
+LCurbO <- read.csv(file.path(path.google, dir(path.google, "Landsat8_urban-open")[length(dir(path.google, "Landsat8_urban-open"))]))
+LCurbL <- read.csv(file.path(path.google, dir(path.google, "Landsat8_urban-low")[length(dir(path.google, "Landsat8_urban-low"))]))
+LCurbM <- read.csv(file.path(path.google, dir(path.google, "Landsat8_urban-med")[length(dir(path.google, "Landsat8_urban-med"))]))
+LCurbH <- read.csv(file.path(path.google, dir(path.google, "Landsat8_urban-high")[length(dir(path.google, "Landsat8_urban-high"))]))
 summary(forest)
 
-forest$type = "forest"
-grass$type = "grassland"
-crop$type = "crop"
-urbO$type = "urban-open"
-urbL$type = "urban-low"
-urbM$type = "urban-med"
-urbH$type = "urban-high"
+LCforest$type = "forest"
+LCgrass$type = "grassland"
+LCcrop$type = "crop"
+LCurbO$type = "urban-open"
+LCurbL$type = "urban-low"
+LCurbM$type = "urban-med"
+LCurbH$type = "urban-high"
 
 head(forest)
 
