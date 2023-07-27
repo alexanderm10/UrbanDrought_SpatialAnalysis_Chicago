@@ -33,13 +33,15 @@ for(LCTYPE in lcnames){
   ndviAll <- rbind(ndviAll, landsatAll)
 }
 summary(ndviAll)
+unique(ndviAll$mission)
 
 ndviAll$date <- as.Date(ndviAll$date)
 ndviAll$year <- lubridate::year(ndviAll$date)
 ndviAll$yday <- lubridate::yday(ndviAll$date)
-ndviAll$type <- factor(ndviAll$type, levels=rev(c("forest", "grassland", "crop", "urban-open", "urban-low", "urban-med", "urban-high")))
+ndviAll$type <- factor(ndviAll$type, levels=rev(c("forest", "grassland", "crop", "urban-open", "urban-low", "urban-medium", "urban-high")))
 head(ndviAll)
 summary(ndviAll)
+unique(ndviAll$type)
 
 png("~/Google Drive/Shared drives/Urban Ecological Drought/Neighborhood remote sensing analysis/NDVI_Landsat_NLCD_latest.png", height=8, width=11, units="in", res=320)
 ggplot(data=ndviAll[,], aes(x=yday, y=NDVI)) +
