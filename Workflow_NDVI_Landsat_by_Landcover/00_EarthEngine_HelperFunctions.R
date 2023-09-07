@@ -1,5 +1,7 @@
 # Script with a bunch of commonly used helper functions to streamline code
-#Jillian
+#Jillian;
+# Hi Jillian!  This is working!
+
 addTime <- function(image){ 
   return(image$addBands(image$metadata('system:time_start')$divide(1000 * 60 * 60 * 24 * 365)))
 }
