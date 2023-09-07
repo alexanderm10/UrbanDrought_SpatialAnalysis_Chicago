@@ -13,3 +13,5 @@
 # 6. Create landcover-specific collections using the existing nlcd-based masks (see script 01) 
 # 7. Reduce to the mean value for each image date
 # 6. **APPEND** data to the existing file for each Landsat product (e.g. Landsat 8, Landsat 9) with the time series for each landcover class -- 1 value per landcover class per date
+
+

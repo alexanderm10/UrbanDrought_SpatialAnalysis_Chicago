@@ -15,6 +15,7 @@ ee_check() # For some reason, it's important to run this before initializing rig
 rgee::ee_Initialize(user = 'crollinson@mortonarb.org', drive=T)
 path.google.CR <- "~/Google Drive/My Drive/UrbanEcoDrought/"
 path.google.share <- "~/Google Drive/Shared drives/Urban Ecological Drought/"
+NDVIsave <- "UrbanEcoDrought_NDVI_LocalExtract"
 # GoogleFolderSave <- "UHI_Analysis_Output_Final_v2"
 assetHome <- ee_get_assethome()
 
@@ -110,7 +111,7 @@ l8Mosaic = mosaicByDate(landsat8, 7)$select(c('blue_median', 'green_median', 're
 # Mask NDVI by Landcover & condense to regional means
 for(LCTYPE in lcnames){
   # print(LCTYPE)
-  extractByLC(imcol=l8Mosaic, landcover=LCTYPE, outfolder="UrbanEcoDrought_TEST", fileNamePrefix=paste0("Landsat8_", LCTYPE))
+  extractByLC(imcol=l8Mosaic, landcover=LCTYPE, outfolder=NDVIsave, fileNamePrefix=paste0("Landsat8_", LCTYPE))
 }
 
 ##################### 
@@ -150,7 +151,7 @@ l9Mosaic = mosaicByDate(landsat9, 7)$select(c('blue_median', 'green_median', 're
 # Mask NDVI by Landcover & condense to regional means
 for(LCTYPE in lcnames){
   # print(LCTYPE)
-  extractByLC(imcol=l9Mosaic, landcover=LCTYPE, outfolder="UrbanEcoDrought_TEST", fileNamePrefix=paste0("Landsat9_", LCTYPE))
+  extractByLC(imcol=l9Mosaic, landcover=LCTYPE, outfolder=NDVIsave, fileNamePrefix=paste0("Landsat9_", LCTYPE))
 }
 
 ##################### 
@@ -190,7 +191,7 @@ l7Mosaic = mosaicByDate(landsat7, 7)$select(c('blue_median', 'green_median', 're
 # Mask NDVI by Landcover & condense to regional means
 for(LCTYPE in lcnames){
   # print(LCTYPE)
-  extractByLC(imcol=l7Mosaic, landcover=LCTYPE, outfolder="UrbanEcoDrought_TEST", fileNamePrefix=paste0("Landsat7_", LCTYPE))
+  extractByLC(imcol=l7Mosaic, landcover=LCTYPE, outfolder=NDVIsave, fileNamePrefix=paste0("Landsat7_", LCTYPE))
 }
 
 ##################### 
@@ -231,8 +232,6 @@ l5Mosaic = mosaicByDate(landsat5, 7)$select(c('blue_median', 'green_median', 're
 # Mask NDVI by Landcover & condense to regional means
 for(LCTYPE in lcnames){
   # print(LCTYPE)
-  extractByLC(imcol=l5Mosaic, landcover=LCTYPE, outfolder="UrbanEcoDrought_TEST", fileNamePrefix=paste0("Landsat5_", LCTYPE))
+  extractByLC(imcol=l5Mosaic, landcover=LCTYPE, outfolder=NDVIsave, fileNamePrefix=paste0("Landsat5_", LCTYPE))
 }
-
-
 ##################### 

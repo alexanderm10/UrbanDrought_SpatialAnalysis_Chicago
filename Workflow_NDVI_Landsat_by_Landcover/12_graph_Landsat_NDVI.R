@@ -9,17 +9,19 @@
 
 library(ggplot2)
 # path.google <- ("~/Google Drive/Shared drives/Urban Ecological Drought/data/landsat_NDVI")
-path.google <- ("~/Google Drive/My Drive/UrbanEcoDrought_TEST")
+path.google <- ("~/Google Drive/My Drive/")
+# NDVIsave <- "UrbanEcoDrought_NDVI_LocalExtract"
+NDVIsave <- "UrbanEcoDrought_LocalExtract"
 
 # Clunky code, but should pull the latest file
 lcnames <- c("forest", "crop", "grassland", "urban-high", "urban-medium", "urban-low", "urban-open")
 
 ndviAll <- data.frame()
 for(LCTYPE in lcnames){
-  landsat8 <- read.csv(file.path(path.google, dir(path.google, paste0("Landsat8_", LCTYPE))[length(dir(path.google, paste0("Landsat8_", LCTYPE)))]))
-  landsat9 <- read.csv(file.path(path.google, dir(path.google, paste0("Landsat9_", LCTYPE))[length(dir(path.google, paste0("Landsat9_", LCTYPE)))]))
-  landsat7 <- read.csv(file.path(path.google, dir(path.google, paste0("Landsat7_", LCTYPE))[length(dir(path.google, paste0("Landsat7_", LCTYPE)))]))
-  landsat5 <- read.csv(file.path(path.google, dir(path.google, paste0("Landsat5_", LCTYPE))[length(dir(path.google, paste0("Landsat5_", LCTYPE)))]))
+  landsat8 <- read.csv(file.path(path.google, NDVIsave, dir(file.path(path.google, NDVIsave), paste0("Landsat8_", LCTYPE))[length(dir(file.path(path.google, NDVIsave), paste0("Landsat8_", LCTYPE)))]))
+  landsat9 <- read.csv(file.path(path.google, NDVIsave, dir(file.path(path.google, NDVIsave), paste0("Landsat9_", LCTYPE))[length(dir(file.path(path.google, NDVIsave), paste0("Landsat9_", LCTYPE)))]))
+  landsat7 <- read.csv(file.path(path.google, NDVIsave, dir(file.path(path.google, NDVIsave), paste0("Landsat7_", LCTYPE))[length(dir(file.path(path.google, NDVIsave), paste0("Landsat7_", LCTYPE)))]))
+  landsat5 <- read.csv(file.path(path.google, NDVIsave, dir(file.path(path.google, NDVIsave), paste0("Landsat5_", LCTYPE))[length(dir(file.path(path.google, NDVIsave), paste0("Landsat5_", LCTYPE)))]))
   
   landsat8$mission <- "landsat 8"
   landsat9$mission <- "landsat 9"
