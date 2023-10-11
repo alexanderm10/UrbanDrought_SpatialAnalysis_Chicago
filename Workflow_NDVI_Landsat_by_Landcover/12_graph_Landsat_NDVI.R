@@ -11,7 +11,7 @@ library(ggplot2)
 # path.google <- ("~/Google Drive/Shared drives/Urban Ecological Drought/data/landsat_NDVI")
 path.google <- ("~/Google Drive/My Drive/")
 # NDVIsave <- "UrbanEcoDrought_NDVI_LocalExtract"
-NDVIsave <- "UrbanEcoDrought_LocalExtract"
+NDVIsave <- "UrbanEcoDrought_NDVI_LocalExtract"
 
 # Clunky code, but should pull the latest file
 lcnames <- c("forest", "crop", "grassland", "urban-high", "urban-medium", "urban-low", "urban-open")
@@ -50,7 +50,7 @@ ggplot(data=ndviAll[,], aes(x=yday, y=NDVI)) +
   ggtitle(paste0("Landsat 5,7,8,9 NDVI, last image: ", max(ndviAll$date))) +
   facet_wrap(~type) +
   # stat_smooth(color="black", fill=NA, size=0.5) +
-  geom_line(aes(group=year), color="gray30", size=0.1)+
+  geom_line(aes(group=year, color="historical"), alpha=0.5, size=0.1)+
   geom_line(data=ndviAll[ndviAll$year==2005, ], aes(color="2005"), size=0.25) +
   geom_line(data=ndviAll[ndviAll$year==2012, ], aes(color="2012"), size=0.25) +
   geom_line(data=ndviAll[ndviAll$year==2023, ], aes(color="2023"), size=0.5) +
