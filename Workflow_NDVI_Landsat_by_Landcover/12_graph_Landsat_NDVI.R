@@ -13,6 +13,13 @@ path.google <- ("~/Google Drive/My Drive/")
 # NDVIsave <- "UrbanEcoDrought_NDVI_LocalExtract"
 NDVIsave <- "UrbanEcoDrought_NDVI_LocalExtract"
 
+
+day.labels <- data.frame(Date=seq.Date(as.Date("2023-01-01"), as.Date("2023-12-01"), by="month"))
+day.labels$yday <- lubridate::yday(day.labels$Date)
+day.labels$Text <- paste(lubridate::month(day.labels$Date, label=T), lubridate::day(day.labels2$Date))
+day.labels
+summary(day.labels)
+
 # Clunky code, but should pull the latest file
 lcnames <- c("forest", "crop", "grassland", "urban-high", "urban-medium", "urban-low", "urban-open")
 
@@ -59,6 +66,7 @@ ggplot(data=ndviAll[,], aes(x=yday, y=NDVI)) +
   stat_smooth(data=ndviAll[ndviAll$year==2005, ], aes(color="2005", fill="2005"), size=1, alpha=0.2, method="gam") +
   stat_smooth(data=ndviAll[ndviAll$year==2012, ], aes(color="2012", fill="2012"), size=1, alpha=0.2, method="gam") +
   stat_smooth(data=ndviAll[ndviAll$year==2023, ], aes(color="2023", fill="2023"), size=1.25, alpha=0.5, method="gam") +
+  scale_x_continuous(name="Day of Year", expand=c(0,0), breaks=day.labels$yday[seq(2, 12, by=3)], labels=day.labels$Text[seq(2, 12, by=3)])  +
   scale_color_manual(values=c('2023'="firebrick2", '2012'="goldenrod1", '2005'="darkorange2", 'historical'='black')) +
   scale_fill_manual(values=c('2023'="firebrick2", '2012'="goldenrod1", '2005'="darkorange2", 'historical'='black')) +
   coord_cartesian(ylim=c(0,1)) +
