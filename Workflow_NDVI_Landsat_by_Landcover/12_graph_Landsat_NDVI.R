@@ -75,3 +75,29 @@ ggplot(data=ndviAll[,], aes(x=yday, y=NDVI)) +
   theme_bw()
 dev.off()
  
+
+png("~/Google Drive/Shared drives/Urban Ecological Drought/Neighborhood remote sensing analysis/NDVI_Landsat_NLCD_latest_NoGrassland.png", height=6, width=12, units="in", res=320)
+ggplot(data=ndviAll[ndviAll$type!="grassland",], aes(x=yday, y=NDVI)) +
+  # ggtitle(paste0("Landsat 5,7,8,9 NDVI, last image: ", max(ndviAll$date))) +
+  facet_wrap(~type) +
+  # stat_smooth(color="black", fill=NA, size=0.5) +
+  geom_line(aes(group=year, color="historical"), alpha=0.5, size=0.1)+
+  geom_line(data=ndviAll[ndviAll$year==2005 & ndviAll$type!="grassland", ], aes(color="2005"), size=0.25) +
+  geom_line(data=ndviAll[ndviAll$year==2012 & ndviAll$type!="grassland", ], aes(color="2012"), size=0.25) +
+  geom_line(data=ndviAll[ndviAll$year==2023 & ndviAll$type!="grassland", ], aes(color="2023"), size=0.5) +
+  stat_smooth(data=ndviAll[!ndviAll$year %in% c(2005, 2012, 2023) & ndviAll$type!="grassland", ],  aes(color="historical", fill="historical"), size=1.5, alpha=0.5, method="gam") +
+  # stat_smooth(data=ndviAll[ndviAll$yday<=max(ndviAll$yday[ndviAll$year==2023]) & ndviAll$year!=2023, ], aes(color="historical", fill="historical"), size=1.5, alpha=0.8) +
+  stat_smooth(data=ndviAll[ndviAll$year==2005 & ndviAll$type!="grassland", ], aes(color="2005", fill="2005"), size=1, alpha=0.2, method="gam") +
+  stat_smooth(data=ndviAll[ndviAll$year==2012 & ndviAll$type!="grassland", ], aes(color="2012", fill="2012"), size=1, alpha=0.2, method="gam") +
+  stat_smooth(data=ndviAll[ndviAll$year==2023 & ndviAll$type!="grassland", ], aes(color="2023", fill="2023"), size=1.25, alpha=0.5, method="gam") +
+  scale_x_continuous(name="Day of Year", expand=c(0,0), breaks=day.labels$yday[seq(2, 12, by=3)], labels=day.labels$Text[seq(2, 12, by=3)])  +
+  scale_color_manual(name="year", values=c('2023'="firebrick2", '2012'="goldenrod1", '2005'="darkorange2", 'historical'='black')) +
+  scale_fill_manual(name = "year", values=c('2023'="firebrick2", '2012'="goldenrod1", '2005'="darkorange2", 'historical'='black')) +
+  coord_cartesian(ylim=c(0,1)) +
+  labs(x="Day of Year")  +
+  guides(fill=F) +
+  theme_bw() + 
+  theme(strip.text = element_text(size=rel(1.25), face="bold"))
+
+dev.off()
+
