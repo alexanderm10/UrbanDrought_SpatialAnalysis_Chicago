@@ -12,6 +12,10 @@ library(ggplot2)
 path.google <- ("~/Google Drive/My Drive/")
 # NDVIsave <- "UrbanEcoDrought_NDVI_LocalExtract"
 NDVIsave <- "UrbanEcoDrought_NDVI_LocalExtract"
+pathShare <- file.path(path.google, "Shared drives/Urban Ecological Drought/data/UrbanEcoDrought_NDVI_LocalExtract/")
+
+
+fNDVI <- dir(file.path(path.google, NDVIsave))
 
 
 day.labels <- data.frame(Date=seq.Date(as.Date("2023-01-01"), as.Date("2023-12-01"), by="month"))

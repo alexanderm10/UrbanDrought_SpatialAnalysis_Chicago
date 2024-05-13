@@ -55,22 +55,22 @@ chiBBox <- ee$Geometry$BBox(-88.70738, 41.20155, -87.52453, 42.49575)
 # Landcover names and mask ----
 lcnames <- c("forest", "crop", "grassland", "urban-high", "urban-medium", "urban-low", "urban-open")
 
-forMask <- ee$Image('users/crollinson/NLCD-Chicago_2000-2023_Forest')
+forMask <- ee$Image('users/crollinson/NLCD-Chicago_2000-2024_Forest')
 # ee_print(forMask)
 # Map$addLayer(forMask$select("YR2023"))
 
-grassMask <- ee$Image('users/crollinson/NLCD-Chicago_2000-2023_Grass')
+grassMask <- ee$Image('users/crollinson/NLCD-Chicago_2000-2024_Grass')
 # Map$addLayer(grassMask$select("YR2023"))
 
-cropMask <- ee$Image('users/crollinson/NLCD-Chicago_2000-2023_Crop')
+cropMask <- ee$Image('users/crollinson/NLCD-Chicago_2000-2024_Crop')
 
-urbOMask <- ee$Image('users/crollinson/NLCD-Chicago_2000-2023_Urban-Open')
+urbOMask <- ee$Image('users/crollinson/NLCD-Chicago_2000-2024_Urban-Open')
 
-urbLMask <- ee$Image('users/crollinson/NLCD-Chicago_2000-2023_Urban-Low')
+urbLMask <- ee$Image('users/crollinson/NLCD-Chicago_2000-2024_Urban-Low')
 
-urbMMask <- ee$Image('users/crollinson/NLCD-Chicago_2000-2023_Urban-Medium')
+urbMMask <- ee$Image('users/crollinson/NLCD-Chicago_2000-2024_Urban-Medium')
 
-urbHMask <- ee$Image('users/crollinson/NLCD-Chicago_2000-2023_Urban-High')
+urbHMask <- ee$Image('users/crollinson/NLCD-Chicago_2000-2024_Urban-High')
 
 # Map$addLayer(urbLMask$select("YR2023"))
 # Map$addLayer(forMask$select("YR2023"))
