@@ -34,10 +34,10 @@ for(LCTYPE in lcnames){
   fileL7 <- dir(file.path(path.google, NDVIsave), paste0("Landsat7_", LCTYPE))[length(dir(file.path(path.google, NDVIsave), paste0("Landsat7_", LCTYPE)))]
   fileL5 <- dir(file.path(path.google, NDVIsave), paste0("Landsat5_", LCTYPE))[length(dir(file.path(path.google, NDVIsave), paste0("Landsat5_", LCTYPE)))]
   
-  if(!file.exists(file.path(pathShare, fileL8))) file.copy(from=file.path(path.google, NDVIsave, fileL8), to=file.path(pathShare, fileL8))
-  if(!file.exists(file.path(pathShare, fileL9))) file.copy(from=file.path(path.google, NDVIsave, fileL9), to=file.path(pathShare, fileL9))
-  if(!file.exists(file.path(pathShare, fileL7))) file.copy(from=file.path(path.google, NDVIsave, fileL7), to=file.path(pathShare, fileL7))
-  if(!file.exists(file.path(pathShare, fileL5))) file.copy(from=file.path(path.google, NDVIsave, fileL5), to=file.path(pathShare, fileL5))
+  if(!file.exists(file.path(pathShare, fileL8))) file.copy(from=file.path(path.google, NDVIsave, fileL8), to=file.path(pathShare, fileL8), overwrite=T, copy.mode=T)
+  if(!file.exists(file.path(pathShare, fileL9))) file.copy(from=file.path(path.google, NDVIsave, fileL9), to=file.path(pathShare, fileL9), overwrite=T, copy.mode=T)
+  if(!file.exists(file.path(pathShare, fileL7))) file.copy(from=file.path(path.google, NDVIsave, fileL7), to=file.path(pathShare, fileL7), overwrite=T, copy.mode=T)
+  if(!file.exists(file.path(pathShare, fileL5))) file.copy(from=file.path(path.google, NDVIsave, fileL5), to=file.path(pathShare, fileL5), overwrite=T, copy.mode=T)
   
   landsat8 <- read.csv(file.path(path.google, NDVIsave, fileL8))
   landsat9 <- read.csv(file.path(path.google, NDVIsave, fileL9))
