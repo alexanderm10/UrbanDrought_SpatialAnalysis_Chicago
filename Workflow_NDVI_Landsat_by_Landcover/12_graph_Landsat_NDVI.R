@@ -20,7 +20,7 @@ fNDVI <- dir(file.path(path.google, NDVIsave))
 
 day.labels <- data.frame(Date=seq.Date(as.Date("2023-01-01"), as.Date("2023-12-01"), by="month"))
 day.labels$yday <- lubridate::yday(day.labels$Date)
-day.labels$Text <- paste(lubridate::month(day.labels$Date, label=T), lubridate::day(day.labels2$Date))
+day.labels$Text <- paste(lubridate::month(day.labels$Date, label=T), lubridate::day(day.labels$Date))
 day.labels
 summary(day.labels)
 
