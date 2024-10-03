@@ -162,7 +162,8 @@ for(LCTYPE in lcnames){
 # ""LANDSAT/LE07/C02/T1_L2""
 # Load MODIS NDVI data; attach month & year
 # https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C02_T1_L2
-landsat7 <- ee$ImageCollection("LANDSAT/LE07/C02/T1_L2")$filterBounds(Chicago)$map(function(image){
+end_date <- format(Sys.Date(), "%Y-%m-%d")
+landsat7 <- ee$ImageCollection("LANDSAT/LE07/C02/T1_L2")$filterBounds(Chicago)$filterDate("2001-01-01", end_date)$map(function(image){
   return(image$clip(Chicago))
 })$map(function(img){
   d= ee$Date(img$get('system:time_start'));
