@@ -1,4 +1,4 @@
-# Pull NDVI from Landsat 8/9... Right now this just duplicates script 02, but so it goes
+# Pull NDVI from Landsat 7/8/9... Right now this just duplicates script 02, but so it goes
 
 library(rgee); library(raster); library(terra)
 ee_check() # For some reason, it's important to run this before initializing right now
@@ -64,6 +64,47 @@ urbHMask <- ee$Image('users/crollinson/NLCD-Chicago_2000-2024_Urban-High')
 
 # Map$addLayer(urbLMask$select("YR2023"))
 # Map$addLayer(forMask$select("YR2023"))
+##################### 
+
+##################### 
+# Read in & Format Landsat 7 ----
+##################### 
+# ""LANDSAT/LE07/C02/T1_L2""
+# Load MODIS NDVI data; attach month & year
+# https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C02_T1_L2
+end_date <- format(Sys.Date(), "%Y-%m-%d")
+landsat7 <- ee$ImageCollection("LANDSAT/LE07/C02/T1_L2")$filterBounds(Chicago)$filterDate("2001-01-01", end_date)$map(function(image){
+  return(image$clip(Chicago))
+})$map(function(img){
+  d= ee$Date(img$get('system:time_start'));
+  dy= d$get('day');    
+  m= d$get('month');
+  y= d$get('year');
+  
+  # # Add masks 
+  img <- applyLandsatBitMask(img)
+  
+  # #scale correction; doing here & separating form NDVI so it gets saved on the image
+  lAdj = img$select(c('SR_B1', 'SR_B2', 'SR_B3', 'SR_B4', 'SR_B5', 'SR_B7'))$multiply(0.0000275)$add(-0.2);
+  lst_k = img$select('ST_B6')$multiply(0.00341802)$add(149);
+  
+  # img3 = img2$addBands(srcImg=lAdj, overwrite=T)$addBands(srcImg=lst_k, overwrite=T)$set('date',d, 'day',dy, 'month',m, 'year',y)
+  return(img$addBands(srcImg=lAdj, overwrite=T)$addBands(srcImg=lst_k, overwrite=T)$set('date',d, 'day',dy, 'month',m, 'year',y))
+})$select(c('SR_B1', 'SR_B2', 'SR_B3', 'SR_B4', 'SR_B5', 'SR_B7', 'ST_B6'),c('blue', 'green', 'red', 'nir', 'swir1', 'swir2', 'LST_K'))$map(addNDVI)
+# Map$addLayer(landsat7$first()$select('NDVI'), ndviVis, "NDVI - First")
+# ee_print(landsat7)
+# Map$addLayer(landsat7$first()$select('NDVI'))
+
+l7Mosaic = mosaicByDate(landsat7, 7)$select(c('blue_median', 'green_median', 'red_median', 'nir_median', 'swir1_median', 'swir2_median', 'LST_K_median', "NDVI_median"),c('blue', 'green', 'red', 'nir', 'swir1', 'swir2', 'LST_K', "NDVI"))$sort("date")
+# ee_print(l7Mosaic, "landsat7-Mosaic")
+# Map$addLayer(l7Mosaic$first()$select('NDVI'), ndviVis, "NDVI - First")
+
+# Mask NDVI by Landcover & condense to regional means
+for(LCTYPE in lcnames){
+  # print(LCTYPE)
+  extractByLC(imcol=l7Mosaic, landcover=LCTYPE, outfolder=NDVIsave, fileNamePrefix=paste0("Landsat7_", LCTYPE))
+}
+
 ##################### 
 
 ##################### 
