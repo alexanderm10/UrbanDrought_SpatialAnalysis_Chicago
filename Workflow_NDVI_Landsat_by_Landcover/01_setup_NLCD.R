@@ -155,9 +155,9 @@ lcChi2021 <- lcChi2021$set('system:time_start', ee$Date$fromYMD(2021, 1, 1))$set
 lcChi2022 <- lcChi2021$set('system:time_start', ee$Date$fromYMD(2022, 1, 1))$set('year',2022);
 lcChi2023 <- lcChi2021$set('system:time_start', ee$Date$fromYMD(2023, 1, 1))$set('year',2023);
 lcChi2024 <- lcChi2021$set('system:time_start', ee$Date$fromYMD(2024, 1, 1))$set('year',2024);
+lcChi2025 <- lcChi2021$set('system:time_start', ee$Date$fromYMD(2025, 1, 1))$set('year',2025);
 
-
-collAnn <- ee$ImageCollection(c(lcChi2001, lcChi2002, lcChi2003, lcChi2004, lcChi2005, lcChi2006, lcChi2007, lcChi2008, lcChi2009, lcChi2010, lcChi2011, lcChi2012, lcChi2013, lcChi2014, lcChi2015, lcChi2016, lcChi2017, lcChi2018, lcChi2019, lcChi2020, lcChi2021, lcChi2022, lcChi2023, lcChi2024))
+collAnn <- ee$ImageCollection(c(lcChi2001, lcChi2002, lcChi2003, lcChi2004, lcChi2005, lcChi2006, lcChi2007, lcChi2008, lcChi2009, lcChi2010, lcChi2011, lcChi2012, lcChi2013, lcChi2014, lcChi2015, lcChi2016, lcChi2017, lcChi2018, lcChi2019, lcChi2020, lcChi2021, lcChi2022, lcChi2023, lcChi2024,lcChi2025))
 
 # Saving will be much easier if it's a single year with multiple bands
 yrLC <- ee$List(collAnn$aggregate_array("year"))$distinct()
