@@ -127,7 +127,9 @@ ui <- dashboardPage(skin = "black",
                         menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
                         menuItem("Analysis", tabName = "analysis", icon = icon("gears"),
                                  menuSubItem("NDVI Data Review",
-                                             tabName = "NDVI_data_review")),
+                                             tabName = "NDVI_data_review"),
+                                 menuSubItem("Distribution Plot Review",
+                                             tabName = "dist_plot_review")),
                         menuItem("Additional Graphics By LC Types", tabName = "graphics", icon = icon("chart-simple"),
                           menuSubItem("Forest Graphics",
                                     tabName = "for_graphics"),
@@ -147,54 +149,104 @@ ui <- dashboardPage(skin = "black",
                       )
                     ),
                     dashboardBody(
-                      # Custom CSS for grid layout and positioning
+                      # Custom CSS
                       tags$head(
                         tags$style(HTML("
-   .county-container {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 10px;
-      }
-      .county-box {
-        flex: 1;
-        text-align: center;
-        font-size: 14px;
-        font-weight: bold;
-        padding: 10px;
-        border-radius: 5px;
-        margin: 5px;
-        color: white;
-      }
-      .above-normal { background-color: #2E86C1; }
-      .below-low { background-color: #F1C40F; }
-      .below-medium { background-color: #E67E22; }
-      .below-high { background-color: #D35400; }
-"))
-                        
+        .small-box {
+          min-height: 10px !important;  /* Adjust the height of the box */
+          width: 150px !important;  /* Adjust the width */
+        }
+        
+        .small-box .inner h3 { 
+          font-size: 14px !important;  /* Adjust main value text size */
+        }
+        
+        .small-box .inner p { 
+          font-size: 14px !important;  /* Adjust subtitle text size */
+        }
+      "))
                       ),
                       
                       tabItems(
                               tabItem(tabName = "dashboard",
-                                # Row for counties' drought status
+                                # Row for drought status for each LC type
                                 fluidRow(
-                                  div(class = "county-container",
-                                      div(class = "county-box above-normal", "Crop: Above Normal"),
-                                      div(class = "county-box above-normal", "Forest: Above Normal"),
-                                      div(class = "county-box below-low", "Grass: Below Normal - Low"),
-                                      div(class = "county-box below-high", "Urban-High: Below Normal - High"),
-                                      div(class = "county-box below-low", "Urban-Medium: Below Normal - Low"),
-                                      div(class = "county-box below-medium", "Urban-Low: Below Normal - Medium"),
-                                      div(class = "county-box above-normal", "Urban-Open: Above Normal")
+                                  column(width = 12,
+                                         div(
+                                           style = "
+        display: flex; 
+        flex-wrap: wrap;    /* Allows items to wrap to a new line if needed */
+        gap: 5px;           /* Spacing between boxes */
+        justify-content: space-around; /* or space-between/center, etc. */
+      ",
+                                           
+                                           # Let each valueBoxOutput have no fixed Bootstrap column width
+                                           valueBoxOutput("cropBox", width = NULL),
+                                           valueBoxOutput("forBox", width = NULL),
+                                           valueBoxOutput("grassBox", width = NULL),
+                                           valueBoxOutput("uhBox", width = NULL),
+                                           valueBoxOutput("umBox", width = NULL),
+                                           valueBoxOutput("ulBox", width = NULL),
+                                           valueBoxOutput("uoBox", width = NULL)
+                                         )
                                   )
-                                ),
+                                )
+                                ,
                                 
                                 # Map layout
                                 fluidRow(
-                                  column(width = 4, 
-                                         leafletOutput("il_county_map", height = "475px")),
+                                  column(width = 5, 
+                                         leafletOutput("il_county_map", height = "350px")),
                                   #Density plot graphs, put here for formatting
                                   tabBox(
-                                    width = 8,
+                                    title = tagList(shiny::icon("bars"), "General Information"),
+                                    width = 7,
+                                    tabPanel(
+                                      "Latest Data Report",
+                                      h4(paste("Most Recent Data is from", format(date_needed, "%B %d, %Y"))),
+                                      h5(HTML("<br>Current landcover types considered in drought:<br><br>
+     <b>Crop</b><br>
+     <b>Forest</b><br>
+     <b>Urban-High</b><br>
+     <b>Urban-Open</b>")),
+                                      p("For a more in-depth exploration, take a look at the other tabs or the directory.")
+                                    ),
+                                    tabPanel(
+                                      "Status Key",
+                                      h5(HTML("Most Recent NDVI Value - Mean = Status<br><br>")),
+                                      h5(HTML("<span style='color:green;'>Green</span> = Most Recent NDVI Value is At or Above Mean")),
+                                      h5(HTML("<span style='color:yellow;'>Yellow</span> = Most Recent NDVI Value is Below Mean (Status >= -.01)")),
+                                      h5(HTML("<span style='color:orange;'>Orange</span> = Most Recent NDVI Value is Below Mean ( -.02 <= Status < -.01)")),
+                                      h5(HTML("<span style='color:red;'>Red</span> = Most Recent NDVI Value is Below Mean (Stauts < -.02)"))
+                                    ),
+                                    tabPanel(
+                                      "Directory",
+                                   h4("Dashboard"),
+                                   HTML(
+                                     "<ul>
+      <li>Map of LC Types</li>
+      <li>Distribution Plots of LC Types</li>
+      <li>Status of LC Types</li>
+    </ul>"      ),
+                                   h4("Analysis"),
+                                   HTML(
+                                     "<ul>
+      <li>Yearly, Monthly & Weekly NDVI Graphs</li>
+      <li>Distribution Plot Statistics</li>
+    </ul>"      ),
+                                   h4("Specifics"),
+                                   HTML(
+                                     "<ul>
+      <li>Researchers</li>
+      <li>Workflows</li>
+      <li>Github & Documentation Links</li>
+    </ul>"      )
+                                    )
+                                )),
+                                fluidRow(
+                                  #Density plot graphs, put here for formatting
+                                  tabBox(
+                                    width = 12,
                                     tabPanel(
                                       "Crop Density Plot",
                                       plotOutput("crop_density_plot")
@@ -224,56 +276,54 @@ ui <- dashboardPage(skin = "black",
                                       plotOutput("uo_density_plot")
                                     )
                                   )
-                                ),
-                                
-                                # NDVI Graphs
-                                tabBox(
-                                  title = "NDVI Data",
-                                  id = "tab1",
-                                  height = "250px",
-                                  width = 12, 
-                                  checkboxGroupInput(
-                                    inputId = "landcover_types",
-                                    label = "Select Landcover Types",
-                                    choices = c(
-                                      "crop" = "Crop",
-                                      "forest" = "Forest",
-                                      "grass" = "Grass",
-                                      "urban-high" = "Urban High",
-                                      "urban-medium" = "Urban Medium",
-                                      "urban-low" = "Urban Low",
-                                      "urban-open" = "Urban Open"
-                                    ),
-                                    selected = c("crop", "forest", "grass", "urban-high", "urban-medium", "urban-low", "urban-open"),
-                                    inline = TRUE
-                                  ),
-                                  tabPanel(
-                                    "Full Review",
-                                    plotOutput("all_data_graph")
-                                  ),
-                                  tabPanel("Yearly",
-                                           plotOutput("yearly_graph"),
-                                           dateInput(inputId = "start_date", label = "Enter Start Date", value = as.Date(Sys.Date()) - 365)),
-                                  tabPanel("Monthly", 
-                                           plotOutput("monthly_graph"),
-                                           dateInput(inputId = "mstart_date", label = "Enter Start Date", value = Sys.Date() %m-% months(1))),
-                                  tabPanel("Weekly", 
-                                           plotOutput("weekly_graph"),
-                                           dateInput(inputId = "wstart_date", label = "Enter Start Date", value = as.Date(Sys.Date()) - 7)
+                                  
+                                  
+                                  
+                                  
+                                  
                                 )
                                 
-                                )),
+                           ),
+                           tabItem(tabName = "NDVI_data_review",
+                                   
+                                   # NDVI Graphs
+                                   tabBox(
+                                     title = "NDVI Data",
+                                     id = "tab1",
+                                     height = "250px",
+                                     width = 12, 
+                                     checkboxGroupInput(
+                                       inputId = "landcover_types",
+                                       label = "Select Landcover Types",
+                                       choices = c(
+                                         "crop" = "Crop",
+                                         "forest" = "Forest",
+                                         "grass" = "Grass",
+                                         "urban-high" = "Urban High",
+                                         "urban-medium" = "Urban Medium",
+                                         "urban-low" = "Urban Low",
+                                         "urban-open" = "Urban Open"
+                                       ),
+                                       selected = c("crop", "forest", "grass", "urban-high", "urban-medium", "urban-low", "urban-open"),
+                                       inline = TRUE
+                                     ),
+                                     tabPanel(
+                                       "Full Review",
+                                       plotOutput("all_data_graph")
+                                     ),
+                                     tabPanel("Yearly",
+                                              plotOutput("yearly_graph"),
+                                              dateInput(inputId = "start_date", label = "Enter Start Date", value = as.Date(Sys.Date()) - 365)),
+                                     tabPanel("Monthly", 
+                                              plotOutput("monthly_graph"),
+                                              dateInput(inputId = "mstart_date", label = "Enter Start Date", value = Sys.Date() %m-% months(1))),
+                                     tabPanel("Weekly", 
+                                              plotOutput("weekly_graph"),
+                                              dateInput(inputId = "wstart_date", label = "Enter Start Date", value = as.Date(Sys.Date()) - 7)
+                                     )
+                                     
+                                   )),
                                 
-                        tabItem(tabName = "NDVI Data Review",
-
-                                div(class = "top-right-slider",
-                                    sliderInput("integer", "Years:",
-                                                min = 2014, max = 2025,
-                                                value = 2020, width = "1050%")),
-                                fluidRow(column(width = 12, DT::dataTableOutput("data_table")))
-                                
-                          ),
-                        
                         tabItem(tabName = "for_graphics",
                                 fluidRow(
                                   uiOutput("for_gallery") 
@@ -305,10 +355,10 @@ ui <- dashboardPage(skin = "black",
                         tabItem(tabName = "Specifics",
                                 textInput("txt", "Enter the text to display below:"),
                                 textOutput("text")
-                        )
+                        ))
                         
                       
-                    )
+                    
 ))
 
 # Define server logic
@@ -346,7 +396,80 @@ server <- function(input, output, session) {
       )
   })
   
+  ####################################################################################################################
+  #Status KPI Boxes for each LC Type
+  output$cropBox <- renderValueBox({
+    result <- LC_status("crop", NDVI_data, CI_csv, most_recent_data)
+    
+    valueBox(
+      value = "Crop Status",
+      subtitle = result$status,  
+      color = result$color
+    )
+  })
   
+  output$forBox <- renderValueBox({
+    result <- LC_status("forest", NDVI_data, CI_csv, most_recent_data)
+    
+    valueBox(
+      value = "Forest Status",
+      subtitle = result$status,  
+      color = result$color  
+    )
+  })
+  
+  output$grassBox <- renderValueBox({
+    result <- LC_status("grassland", NDVI_data, CI_csv, most_recent_data)
+    
+    valueBox(
+      value = "Grassland Status",
+      subtitle = result$status,
+      color = result$color  
+    )
+  })
+  
+  output$uhBox <- renderValueBox({
+    result <- LC_status("urban-high", NDVI_data, CI_csv, most_recent_data)
+    
+    valueBox(
+      value = "Urban-High Status",
+      subtitle = result$status,  
+      color = result$color  
+    )
+  })
+  
+  output$umBox <- renderValueBox({
+    result <- LC_status("urban-medium", NDVI_data, CI_csv, most_recent_data)
+    
+      valueBox(
+        value = "Urban-Medium Status",
+        subtitle = result$status,  
+        color = result$color  
+      )
+  })
+  
+  output$ulBox <- renderValueBox({
+    result <- LC_status("urban-low", NDVI_data, CI_csv, most_recent_data)
+    
+    valueBox(
+      value = "Urban-Low Status",
+      subtitle = result$status,  
+      color = result$color  
+    )
+  })
+  
+  output$uoBox <- renderValueBox({
+    result <- LC_status("urban-open", NDVI_data, CI_csv, most_recent_data)
+    
+    valueBox(
+      value = "Urban-Open Status",
+      subtitle = result$status,  
+      color = result$color  
+    )
+  })
+  
+  
+  ####################################################################################################################
   #NDVI graphs
   #All Data
   output$all_data_graph <- renderPlot({
@@ -385,6 +508,7 @@ server <- function(input, output, session) {
     }
   })
   
+  ####################################################################################################################
   #CI graphs
   output$crop_density_plot <- renderPlot({
     crop_plot <- density_plot("crop", "Crop", NDVI_data, CI_csv, most_recent_data)
@@ -421,7 +545,8 @@ server <- function(input, output, session) {
     print(uo_plot)
   })
 
-  #########forest#########
+  ####################################################################################################################
+  ###########forest###############
   output$for_gallery <- renderUI({
     graphic_return(for_files, "for")
     do.call(fluidRow, img_list)
@@ -437,14 +562,14 @@ server <- function(input, output, session) {
   })
   
   graphic_formatting(for_files, "crop", "crop", output)
-###################grass#########
+  ###########grass###############
   output$grass_gallery <- renderUI({
     graphic_return(grass_files, "grass")
     do.call(fluidRow, img_list)
   })
   
   graphic_formatting(for_files, "grass", "grass", output)
-#############urban##########
+  ###########urban###############
   output$uh_gallery <- renderUI({
     graphic_return(uh_files, "uh")
     do.call(fluidRow, img_list)
@@ -490,13 +615,6 @@ server <- function(input, output, session) {
       stringsAsFactors = FALSE)
     
   })
-  
-  # Show the values in an HTML table ----
-  output$values <- renderTable({
-    sliderValues()
-  })
-  
- 
 
 }
 

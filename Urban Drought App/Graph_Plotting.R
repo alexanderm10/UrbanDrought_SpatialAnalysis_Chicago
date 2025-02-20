@@ -13,9 +13,13 @@ library(tidyr)
 library(tidyverse)
 library(plotly)
 
-#NDVI Graphs Tab Box Functions (Using NDVI data from NDVI Drought MOnitoring WOrkflow so they are fit to the spline)
+#NDVI file path (Using NDVI data from NDVI Drought Monitoring Workflow so they are fit to the spline)
 NDVI_data <-read_csv("/Users/jocelyngarcia/Documents/GitHub/UrbanDrought_SpatialAnalysis_Chicago/Urban Drought App/drought_monitoring_csvs/raw_data_k=12.csv")%>%
   mutate(date = as.Date(date, format="%Y-%m-%d"))
+#CSV file path (Using CSV data from NDVI Drought Monitoring Workflow )
+CI_csv <- read_csv("/Users/jocelyngarcia/Documents/GitHub/UrbanDrought_SpatialAnalysis_Chicago/Urban Drought App/drought_monitoring_csvs/k=12_norms_all_LC_types.csv")
+
+####################################################################################################################
 # All data overview graph
 all_data_graph <- function() {
   ggplot(NDVI_data, aes(x = date, y = NDVI, color = type)) +
@@ -159,7 +163,6 @@ weekly_graph <- function(wstart_date) {
 ####################################################################################################################
 
 #Working on 95% CI interval
-CI_csv <- read_csv("/Users/jocelyngarcia/Documents/GitHub/UrbanDrought_SpatialAnalysis_Chicago/Urban Drought App/drought_monitoring_csvs/k=12_norms_all_LC_types.csv")
 
 #All 7 LC types 95% CI graph
 all_LC_CI_graph <-function(){
@@ -233,8 +236,6 @@ selected_LC_CI_graph <- function(LC_types){
 NDVI_data <-NDVI_data[order(as.Date(NDVI_data$date, format="%Y-%m-%d"), decreasing = TRUE), ]
 
 head(NDVI_data)
-
-#Pulling yday of latest data (most recent day) 
 
 #finding latest day & pulling date
 latest_day<-head(NDVI_data, 1)
