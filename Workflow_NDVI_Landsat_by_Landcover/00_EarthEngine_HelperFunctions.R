@@ -73,9 +73,9 @@ mosaicByDate <- function(imcol, dayWindow){
   imlist = imcol$toList(imcol$size())
   
   # Note: needed to specify the ee_utils_pyfunc since it's not an image collection
-  unique_dates <- imlist$map(function(img) {
+  unique_dates <- imlist$map(ee_utils_pyfunc(function(img) {
     ee$Image(img)$date()$format("YYYY-MM-dd")
-  })$distinct()
+  }))$distinct()
   
   
   # Same as above: what we're mappign through is a List, so need to call python
