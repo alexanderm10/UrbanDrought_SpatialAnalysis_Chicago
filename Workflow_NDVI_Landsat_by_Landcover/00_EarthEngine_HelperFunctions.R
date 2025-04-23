@@ -20,26 +20,46 @@ bitwiseExtract <- function(input, fromBit, toBit) {
   return(input$rightShift(fromBit)$bitwiseAnd(mask))
 }
 
-addNDVI <- function(img){
-  return( img$addBands(img$normalizedDifference(c('nir','red'))$rename('NDVI')));
+#addNDVI <- function(img){
+#  return( img$addBands(img$normalizedDifference(c('nir','red'))$rename('NDVI')));
+#}
+
+addNDVI <- function(img) {
+  ndvi <- img$normalizedDifference(c('nir', 'red'))$rename('NDVI')
+  return(img$addBands(ndvi))
 }
 
+# What we want
+# Fill  - Bit 0 = 0
+
+# Clear - bit 1 = 1
+# Water - bit 2 = 0
+# Cloud Shadow - Bit 3 = 0
+# Snow - bit 4 = 0
+# Cloud - bit 5 = 0
+# Cloud Confidence - Bit 6-7 = 0 or 1
+# Cirrus Confidence - Bit 8-9 = 0 or 1
+# Terrain occlusion - bit 10 = 0
 
 applyLandsatBitMask = function(img){
   qaPix <- img$select('QA_PIXEL');
-  qaRad <- img$select('QA_RADSAT');
-  terrMask <- qaRad$bitwiseAnd(11)$eq(0); ## get rid of any terrain occlusion
+  # qaRad <- img$select('QA_RADSAT');
+  # terrMask <- qaRad$bitwiseAnd(11)$eq(0); ## get rid of any terrain occlusion
   # satMask <- qaRad$bitwiseAnd(3 << 4)$eq(0); ## get rid of any saturated bands we use to calculate NDVI
-  satMask <- bitwiseExtract(qaRad, 3, 4)$eq(0) ## get rid of any saturated bands we use to calculate NDVI 
+  # satMask <- bitwiseExtract(qaRad, 3, 4)$eq(0) ## get rid of any saturated bands we use to calculate NDVI
   # clearMask <- qaPix$bitwiseAnd(1<<7)$eq(0)
-  clearMask <- bitwiseExtract(qaPix, 1, 5)$eq(0)
-  waterMask <- bitwiseExtract(qaPix, 7, 7)$eq(0)
+  
+  fillMask <- bitwiseExtract(qaPix, 0, 0)$eq(0) # 0 means no filler
+  shadowMask <- bitwiseExtract(qaPix, 4, 4)$eq(0) # 0 means no snow
+  snowMask <- bitwiseExtract(qaPix, 5, 5)$eq(0) # 0 means no snow
+  clearMask <- bitwiseExtract(qaPix, 6, 6)$eq(1) # 1 means its clear
+  waterMask <- bitwiseExtract(qaPix, 7, 7)$eq(0) # 0 means it's not water
   cloudConf = bitwiseExtract(qaPix, 8, 9)$lte(1) ## we can only go with low confidence; doing finer leads to NOTHING making the cut
   shadowConf <- bitwiseExtract(qaPix, 10, 11)$lte(1) ## we can only go with low confidence; doing finer leads to NOTHING making the cut
   snowConf <- bitwiseExtract(qaPix, 12, 13)$lte(1) ## we can only go with low confidence; doing finer leads to NOTHING making the cut
   
   
-  img <- img$updateMask(clearMask$And(waterMask)$And(cloudConf)$And(shadowConf)$And(snowConf)$And(terrMask)$And(satMask));
+  img <- img$updateMask(fillMask$And(shadowMask)$And(snowMask)$And(clearMask)$And(waterMask)$And(cloudConf)$And(shadowConf)$And(snowConf));
   
   return(img)
   
@@ -53,9 +73,10 @@ mosaicByDate <- function(imcol, dayWindow){
   imlist = imcol$toList(imcol$size())
   
   # Note: needed to specify the ee_utils_pyfunc since it's not an image collection
-  unique_dates <- imlist$map(ee_utils_pyfunc(function(img){
-    return(ee$Image(img)$date()$format("YYYY-MM-dd"))
-  }))$distinct()
+  unique_dates <- imlist$map(function(img) {
+    ee$Image(img)$date()$format("YYYY-MM-dd")
+  })$distinct()
+  
   
   # Same as above: what we're mappign through is a List, so need to call python
   mosaic_imlist = unique_dates$map(ee_utils_pyfunc(function(d){
@@ -111,20 +132,20 @@ extractByLC <- function(imcol, landcover, outfolder, fileNamePrefix, ...){
   if(landcover=="urban-medium") lcMask = urbMMask
   if(landcover=="urban-low") lcMask = urbLMask
   if(landcover=="urban-open") lcMask = urbOMask
-
+  
   ndviLCYear <- maskByLC(imcol, lcMask)
-
+  
   # regionNDVIMean is a function defied above
   LCMeans = ee$FeatureCollection(ndviLCYear$map(regionNDVIMean))
-
+  
   LCMeansSave <- ee_table_to_drive(collection=LCMeans,
-                                    description=paste0("Save_", fileNamePrefix),
-                                    folder=outfolder,
-                                    fileNamePrefix=fileNamePrefix,
-                                    timePrefix=T,
-                                    fileFormat="CSV",
-                                    selectors=c("date", "NDVI"))
+                                   description=paste0("Save_", fileNamePrefix),
+                                   folder=outfolder,
+                                   fileNamePrefix=fileNamePrefix,
+                                   timePrefix=T,
+                                   fileFormat="CSV",
+                                   selectors=c("date", "NDVI"))
   LCMeansSave$start()
-
+  
   return(print(paste0(fileNamePrefix, " processed! Check Earth Engine queue for status")))
 }
