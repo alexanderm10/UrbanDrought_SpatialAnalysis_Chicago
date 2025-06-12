@@ -12,7 +12,7 @@ library(ggplot2)
 path.google <- ("~/Google Drive/My Drive/")
 # NDVIsave <- "UrbanEcoDrought_NDVI_LocalExtract"
 NDVIsave <- "UrbanEcoDrought_NDVI_LocalExtract"
-pathShare <- file.path(path.google, "../Shared drives/Urban Ecological Drought/data/UrbanEcoDrought_NDVI_LocalExtract/")
+pathShare <- file.path(path.google, "../Shared drives/Urban Ecological Drought/data/UrbanEcoDrought_NDVI_LocalExtract-RAW/")
 # pathShare <- "~/Google Drive/Shared drives/Urban Ecological Drought/data/UrbanEcoDrought_NDVI_LocalExtract/"
 
 fNDVI <- dir(file.path(path.google, NDVIsave))
@@ -25,7 +25,7 @@ day.labels
 summary(day.labels)
 
 # Clunky code, but should pull the latest file
-lcnames <- c("forest", "crop", "grassland", "urban-high", "urban-medium", "urban-low", "urban-open")
+lcnames <- c("forest", "crop", "grassland", "urban-high", "urban-medium", "urban-low", "urban-open", "forest-wet")
 
 ndviAll <- data.frame()
 for(LCTYPE in lcnames){
@@ -61,12 +61,12 @@ unique(ndviAll$mission)
 ndviAll$date <- as.Date(ndviAll$date)
 ndviAll$year <- lubridate::year(ndviAll$date)
 ndviAll$yday <- lubridate::yday(ndviAll$date)
-ndviAll$type <- factor(ndviAll$type, levels=rev(c("forest", "grassland", "crop", "urban-open", "urban-low", "urban-medium", "urban-high")))
+ndviAll$type <- factor(ndviAll$type, levels=rev(c("forest", "forest-wet", "grassland", "crop", "urban-open", "urban-low", "urban-medium", "urban-high")))
 head(ndviAll)
 summary(ndviAll)
 unique(ndviAll$type)
 
-write.csv(ndviAll, file.path(pathShare, "NDVIall_latest.csv"), row.names=F)
+write.csv(ndviAll, file.path(pathShare, "NDVIall_latest_with_forest-wet.csv"), row.names=F)
 
 png("~/Google Drive/Shared drives/Urban Ecological Drought/Neighborhood remote sensing analysis/NDVI_Landsat_NLCD_latest.png", height=8, width=11, units="in", res=320)
 ggplot(data=ndviAll[,], aes(x=yday, y=NDVI)) +
