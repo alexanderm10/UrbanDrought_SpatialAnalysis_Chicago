@@ -1,5 +1,12 @@
-
+Claude.md
 Rplot.png
 .Rhistory
 Workflow_NDVI_Landsat_by_Landcover/.RData
 .Rproj.user
+# Claude Code files
+.claude/
+.claude_history
+claude_context.md
+claude_instructions.md
+*.claude
+".*"
